@@ -73,10 +73,13 @@ export function VillaCard({ villa, onBookingSubmit }: VillaCardProps) {
 
           <div className="mb-6">
             <div className="flex flex-wrap gap-2">
-              {villa.amenities.map((amenity) => (
+              {(typeof villa.amenities === "string" 
+                ? villa.amenities.split(",") 
+                : villa.amenities
+              ).map((amenity: string) => (
                 <Badge key={amenity} variant="secondary" className="flex items-center space-x-1">
-                  {getAmenityIcon(amenity)}
-                  <span>{amenity}</span>
+                  {getAmenityIcon(amenity.trim())}
+                  <span>{amenity.trim()}</span>
                 </Badge>
               ))}
             </div>
