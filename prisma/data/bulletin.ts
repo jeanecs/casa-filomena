@@ -4,7 +4,7 @@ export interface Post {
   content: string;
   author: string;
   date: string;
-  priority: 'normal' | 'important' | 'urgent';
+  priority: 'LOW' | 'MEDIUM' | 'HIGH';
 }
 
 export const initialPosts: Post[] = [
@@ -14,7 +14,7 @@ export const initialPosts: Post[] = [
     content: "We're delighted to have you stay with us. Please don't hesitate to contact our concierge team for any assistance during your visit.",
     author: "Resort Management",
     date: "2025-01-15",
-    priority: "important"
+    priority: "MEDIUM"
   },
   {
     id: 2,
@@ -22,7 +22,7 @@ export const initialPosts: Post[] = [
     content: "For your safety, please be aware of current ocean conditions. Life preservers are available at the beach house. Swimming is recommended during daylight hours only.",
     author: "Safety Team",
     date: "2025-01-14",
-    priority: "urgent"
+    priority: "HIGH"
   },
   {
     id: 3,
@@ -30,14 +30,14 @@ export const initialPosts: Post[] = [
     content: "Housekeeping services are available daily between 10 AM and 3 PM. Please contact reception to schedule your preferred time.",
     author: "Housekeeping",
     date: "2025-01-13",
-    priority: "normal"
+    priority: "LOW"
   }
 ];
 
 export const getPriorityColor = (priority: Post['priority']) => {
   switch (priority) {
-    case 'urgent': return 'bg-red-100 text-red-800';
-    case 'important': return 'bg-yellow-100 text-yellow-800';
+    case 'HIGH': return 'bg-red-100 text-red-800';
+    case 'MEDIUM': return 'bg-yellow-100 text-yellow-800';
     default: return 'bg-gray-100 text-gray-800';
   }
 };

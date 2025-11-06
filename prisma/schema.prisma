@@ -35,7 +35,7 @@ model Villa {
   bedrooms    Int
   bathrooms   Int
   guests      Int
-  amenities   String 
+  amenities   String
   bookings     VillaBooking[]
   availability BookingDate[]
 }
