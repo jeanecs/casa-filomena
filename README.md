@@ -71,10 +71,11 @@ Create a `.env` file in the project root:
 
 ```env
 # Database
-DATABASE_URL="file:./dev.db"
+DATABASE_URL="mysql://root@localhost:3306/casa_filomena"
 
-# Optional: Add other environment variables
-NEXTAUTH_SECRET="your-secret-key"
+ADMIN_USERNAME="admin@casa"
+ADMIN_PASSWORD="password"
+NEXTAUTH_SECRET="zZefb+zgLV0Ex6KcRJZg37slUVpfg2+8DNk0Q2gulPQ="
 NEXTAUTH_URL="http://localhost:3000"
 ```
 

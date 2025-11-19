@@ -16,30 +16,14 @@ export const authOptions = {
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          throw new Error("Missing email or password");
+        const email = String(credentials?.email ?? "");
+        const password = String(credentials?.password ?? "");
+        if (email === process.env.ADMIN_USERNAME && password === process.env.ADMIN_PASSWORD) {
+          return { id: "admin", email };
         }
-
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email },
-        });
-
-        if (!user) {
-          throw new Error("No user found with this email");
-        }
-
-        const isValid = await bcrypt.compare(credentials.password, user.password);
-        if (!isValid) {
-          throw new Error("Invalid password");
-        }
-
-        return {
-          id: String(user.id),
-          name: user.name,
-          email: user.email,
-        };
-      },
-    }),
+        return null;
+      }
+    })
   ],
   session: {
     strategy: "jwt" as const,
