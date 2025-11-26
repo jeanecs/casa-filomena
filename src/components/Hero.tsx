@@ -5,24 +5,24 @@ export function Hero() {
     <section className="relative h-screen flex items-center justify-center overflow-hidden">
       <div className="absolute inset-0">
         <ImageWithFallback
-          src="https://images.unsplash.com/photo-1729720281814-5ddf34c69f8b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBiZWFjaCUyMHZpbGxhJTIwb2NlYW58ZW58MXx8fHwxNzU2MjcxOTEzfDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
+          src="https://scontent.fcgy1-1.fna.fbcdn.net/v/t39.30808-6/561601915_122106831063028391_138386498224499306_n.jpg?stp=cp6_dst-jpg_tt6&_nc_cat=102&ccb=1-7&_nc_sid=cc71e4&_nc_ohc=62dXsxPN4dIQ7kNvwGPYwTw&_nc_oc=AdlTDv1Dy4IF0gmR4iLIw3nRbDc7lQP4LNA1LScSMmYBUOCsr4JHuk7IfaKVsWPSd7I&_nc_zt=23&_nc_ht=scontent.fcgy1-1.fna&_nc_gid=lif4ySTN1padc86vhnh5AQ&oh=00_Afgsc79j4wcU3-jAEN1blNp3XiYNyvL4XpgvkmkGCMQDpw&oe=692C7187"
           alt="Luxury beach villa with ocean view"
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover blur-[2px]"
         />
         <div className="absolute inset-0 bg-black/40"></div>
       </div>
       
       <div className="relative z-10 text-center text-white max-w-4xl mx-auto px-4">
-        <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
+        <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight opacity-70">
           Casa Filomena
         </h1>
-        <p className="text-xl md:text-2xl mb-8 font-light">
+        <p className="text-xl md:text-2xl mb-8 font-light opacity-70">
           Two exclusive luxury villas where the ocean meets paradise
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <a
-            href="#villas"
-            className="bg-white text-gray-900 px-8 py-3 rounded-lg hover:bg-gray-100 transition-colors font-medium"
+            href="/villas"
+            className="bg-white text-gray-900 px-8 py-3 rounded-lg hover:bg-gray-100 hover:opacity-100 transition-colors transition-opacity font-medium opacity-70"
           >
             Explore Villas
           </a>

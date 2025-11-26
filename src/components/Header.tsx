@@ -7,9 +7,13 @@ export function Header() {
         <div className="flex justify-between items-center h-16">
           {/* Logo / Site name */}
           <div className="flex items-center space-x-8">
-            <h1 className="text-2xl font-bold text-gray-900">Oceanside Villas</h1>
+            <a
+                href="./"
+              >
+                <h1 className="text-2xl font-bold text-gray-900">Casa Filomena</h1>
+              </a>
             <nav className="hidden md:flex space-x-6">
-              <a href="#villas" className="text-gray-700 hover:text-gray-900 transition-colors">
+              <a href="/villas" className="text-gray-700 hover:text-gray-900 transition-colors">
                 Villas
               </a>
               <a href="#bulletin" className="text-gray-700 hover:text-gray-900 transition-colors">
