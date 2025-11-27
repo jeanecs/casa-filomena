@@ -16,11 +16,11 @@ export function Header() {
               <a href="/villas" className="text-gray-700 hover:text-gray-900 transition-colors">
                 Villas
               </a>
-              <a href="#bulletin" className="text-gray-700 hover:text-gray-900 transition-colors">
+              <a href="./#bulletin" className="text-gray-700 hover:text-gray-900 transition-colors">
                 Bulletin
               </a>
-              <a href="#map" className="text-gray-700 hover:text-gray-900 transition-colors">
-                Resort Map
+              <a href="/location" className="text-gray-700 hover:text-gray-900 transition-colors">
+                Our Location
               </a>
             </nav>
           </div>

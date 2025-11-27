@@ -27,10 +27,10 @@ export function Hero() {
             Explore Villas
           </a>
           <a
-            href="#map"
+            href="/location"
             className="border-2 border-white text-white px-8 py-3 rounded-lg hover:bg-white hover:text-gray-900 transition-colors font-medium"
           >
-            Resort Map
+            Where We Are
           </a>
         </div>
       </div>

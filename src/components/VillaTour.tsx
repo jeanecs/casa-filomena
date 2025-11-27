@@ -38,7 +38,7 @@ export function VillaTour() {
   }, []);
 
   return (
-    <div className="flex flex-col md:flex-row items-start gap-6 p-6 m-6 rounded-lg">
+    <div className="flex flex-col md:flex-row items-start gap-6 p-6 m-6 rounded-lg scale-90">
       {/* Carousel Section */}
       <div className="w-full md:w-1/3 relative">
         <div className="aspect-[1/1] bg-black rounded-[3px] overflow-hidden relative">
@@ -71,16 +71,31 @@ export function VillaTour() {
 
       {/* Text Section */}
       <div className="w-full md:w-2/3">
-        <h2 className="text-5xl font-bold mb-4">About Us</h2>
+        <h2 className="text-4xl font-bold mb-4">About Us</h2>
         <p className="text-xl text-gray-700">
-          Experience the beauty and elegance of our luxury villas through this
-          photo carousel. From the stunning interiors to the breathtaking
-          surroundings, immerse yourself in the ultimate vacation experience.
+          Welcome to Casa Filomena, where luxury, comfort, and warm Filipino hospitality 
+          come together to create an unforgettable getaway. Our collection of beautifully 
+          designed villas is thoughtfully crafted to offer guests a serene escape, blending 
+          contemporary elegance with the natural charm of Bohol’s island landscape.
         </p>
         <p className="text-xl text-gray-700 mt-4">
-          Whether you're planning a romantic getaway or a family retreat, our
-          villas offer the perfect blend of comfort and style. Book your stay
-          today and make unforgettable memories.
+          As you explore our photo carousel, you’ll get a glimpse of the refined interiors, 
+          inviting living spaces, and the tranquil surroundings that make Casa Filomena truly 
+          special. Every corner is curated to inspire relaxation—from the soft lighting and 
+          stylish décor to the lush greenery that envelopes the property. Here, you can slow 
+          down, breathe, and enjoy the simple pleasures of island living.
+        </p>
+        <p className="text-xl text-gray-700 mt-4">
+          Whether you're dreaming of a romantic retreat with your loved one, planning a 
+          memorable vacation with family and friends, or seeking a peaceful sanctuary to 
+          unwind, our villas provide the perfect setting. Each stay is designed with your 
+          comfort in mind, offering spacious rooms, premium amenities, and thoughtful touches 
+          that make you feel right at home.
+        </p>
+        <p className="text-xl text-gray-700 mt-4">
+          At Casa Filomena, we believe that meaningful moments are made in beautiful places. 
+          Book your stay today and indulge in an experience that blends elegance, tranquility, 
+          and heartfelt service—creating memories that will stay with you long after your visit.
         </p>
       </div>
     </div>
