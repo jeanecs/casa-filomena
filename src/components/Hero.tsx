@@ -13,22 +13,22 @@ export function Hero() {
       </div>
       
       <div className="relative z-10 text-center text-white max-w-4xl mx-auto px-4">
-        <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight opacity-70">
+        <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
           Casa Filomena
         </h1>
-        <p className="text-xl md:text-2xl mb-8 font-light opacity-70">
+        <p className="text-xl md:text-2xl mb-8 font-light">
           Two exclusive luxury villas where the ocean meets paradise
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <a
             href="/villas"
-            className="bg-white text-gray-900 px-8 py-3 rounded-lg hover:bg-gray-100 hover:opacity-100 transition-colors transition-opacity font-medium opacity-70"
+            className="bg-yellow-800 text-white text-md px-6 py-3 rounded-lg hover:bg-yellow-900 transition-colors font-medium shadow-md"
           >
             Explore Villas
           </a>
           <a
             href="/location"
-            className="border-2 border-white text-white px-8 py-3 rounded-lg hover:bg-white hover:text-gray-900 transition-colors font-medium"
+            className="bg-yellow-800 text-white text-md px-6 py-3 rounded-lg hover:bg-yellow-900 transition-colors font-medium shadow-md"
           >
             Where We Are
           </a>

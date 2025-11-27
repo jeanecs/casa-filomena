@@ -22,7 +22,7 @@ export function VillaPortal() {
 
         <Link href="/villas">
           <button
-            className="bg-white text-gray-900 px-8 py-3 rounded-lg hover:bg-gray-100 hover:opacity-100 transition-colors transition-opacity font-medium opacity-70"
+            className="bg-yellow-800 text-white text-md px-6 py-3 rounded-lg hover:bg-yellow-900 transition-colors font-medium shadow-md"
           >
             Explore Villas
           </button>

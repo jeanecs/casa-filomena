@@ -1,8 +1,8 @@
-import { Button } from "./ui/button";
+import Link from "next/link";
 
 export function Header() {
   return (
-    <header className="bg-white/95 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50">
+    <header className="bg-white/95 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50 opacity-90">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo / Site name */}
@@ -10,7 +10,7 @@ export function Header() {
             <a
                 href="./"
               >
-                <h1 className="text-2xl font-bold text-gray-900">Casa Filomena</h1>
+                <h1 className="text-2xl font-bold text-yellow-800">Casa Filomena</h1>
               </a>
             <nav className="hidden md:flex space-x-6">
               <a href="/villas" className="text-gray-700 hover:text-gray-900 transition-colors">
@@ -27,9 +27,11 @@ export function Header() {
 
           {/* Optional: link to booking or contact */}
           <div>
-            <Button asChild>
-              <a href="/contact">Contact Us</a>
-            </Button>
+          <Link href="/location">
+            <button className="bg-yellow-800 text-white text-md px-6 py-3 rounded-lg hover:bg-yellow-900 transition-colors font-medium shadow-md">
+              Contact Us
+            </button>
+          </Link>
           </div>
         </div>
       </div>

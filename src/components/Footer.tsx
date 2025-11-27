@@ -50,7 +50,7 @@ export function Footer() {
             <h4 className="text-lg font-medium mb-4">Quick Links</h4>
             <div className="space-y-2">
               <a href="/villas" className="block text-gray-300 hover:text-white transition-colors">Our Villas</a>
-              <a href="#bulletin" className="block text-gray-300 hover:text-white transition-colors">Resort Bulletin</a>
+              <a href="./#bulletin" className="block text-gray-300 hover:text-white transition-colors">Resort Bulletin</a>
               <a href="/location" className="block text-gray-300 hover:text-white transition-colors">Our Location</a>
             </div>
           </div>
