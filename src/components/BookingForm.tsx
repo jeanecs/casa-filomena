@@ -220,8 +220,9 @@ export function BookingForm({ villa, isOpen, onClose, onBookingSubmit }: Booking
             )}
 
             <div className="flex justify-end space-x-2">
-              <Button variant="outline" onClick={handleClose}>Cancel</Button>
-              <Button onClick={handleDateSubmit} disabled={!isRangeAvailable} className="bg-yellow-800 text-white text-md px-6 py-3 rounded-lg hover:bg-yellow-900 transition-colors font-medium shadow-md font-serifDisplay">
+              <Button variant="outline" onClick={handleClose} className="px-4 py-1 rounded-[2px]">Cancel</Button>
+              <Button onClick={handleDateSubmit} disabled={!isRangeAvailable} className="bg-yellow-800 opacity-80 text-white text-md px-6 px-4 py-1 rounded-[2px] hover:opacity-100 transition-opacity font-medium shadow-xl"
+>
                 Continue
               </Button>
             </div>
@@ -283,10 +284,10 @@ export function BookingForm({ villa, isOpen, onClose, onBookingSubmit }: Booking
             </div>
 
             <div className="flex justify-between">
-              <Button variant="outline" onClick={() => setStep('dates')}>
+              <Button variant="outline" onClick={() => setStep('dates')} className="px-4 py-1 rounded-[2px]">
                 Back
               </Button>
-              <Button onClick={handleBookingSubmit} className="bg-yellow-800 text-white text-md px-6 py-3 rounded-lg hover:bg-yellow-900 transition-colors font-medium shadow-md font-serifDisplay">
+              <Button onClick={handleBookingSubmit} className="bg-yellow-800 text-white text-md px-4 py-1 rounded-[2px] hover:bg-yellow-900 transition-colors font-medium shadow-md font-serifDisplay">
                 <CreditCard className="w-4 h-4 mr-2" />
                 Submit Booking Request
               </Button>

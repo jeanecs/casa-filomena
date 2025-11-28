@@ -7,11 +7,13 @@ export function Header() {
         <div className="flex justify-between items-center h-16">
           {/* Logo / Site name */}
           <div className="flex items-center space-x-8">
-            <a
-                href="./"
-              >
-                <h1 className="text-2xl font-bold text-yellow-800">Casa Filomena</h1>
-              </a>
+            <a href="./">
+              <img
+                src="/Casa Filomena Logo-Black.svg"
+                alt="Casa Filomena Logo"
+                className="h-16 w-auto" // Adjust height and width as needed
+              />
+            </a>
             <nav className="hidden md:flex space-x-6">
               <a href="/villas" className="text-gray-700 hover:text-gray-900 transition-colors">
                 Villas
@@ -27,11 +29,11 @@ export function Header() {
 
           {/* Optional: link to booking or contact */}
           <div>
-          <Link href="/location">
-            <button className="bg-yellow-800 text-white text-md px-6 py-3 rounded-lg hover:bg-yellow-900 transition-colors font-medium shadow-md">
-              Contact Us
-            </button>
-          </Link>
+            <Link href="/location">
+              <button className="bg-yellow-800 text-white text-md px-4 py-1 rounded-[2px] hover:bg-yellow-900 transition-colors font-medium shadow-xl">
+                Contact Us
+              </button>
+            </Link>
           </div>
         </div>
       </div>

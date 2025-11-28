@@ -15,7 +15,7 @@ export default function Location() {
 
       {/* Text Section */}
       <div className="flex-1">
-        <h2 className="text-2xl font-bold mb-4">Located in the Heart of Dauis, Minutes Away From Panglao’s Best</h2>
+        <h2 className="text-yellow-800 text-2xl font-bold mb-4">Located in the Heart of Dauis, Minutes Away From Panglao’s Best</h2>
         <p className="text-gray-700">
           Nestled in the peaceful town of Totolan, Dauis, Casa Filomena Resort & Restaurant sits in a 
           serene spot where the charm of local living meets the beauty of Bohol’s world-famous destinations. 

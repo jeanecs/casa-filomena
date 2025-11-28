@@ -24,13 +24,13 @@ export function Hero() {
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <a
             href="/villas"
-            className="bg-yellow-800 text-white text-md px-6 py-3 rounded-lg hover:bg-yellow-900 transition-colors font-medium shadow-md"
+            className="bg-yellow-800 opacity-80 text-white text-md px-4 py-1 rounded-[2px] hover:opacity-100 transition-opacity font-medium shadow-xl"
           >
             Explore Villas
           </a>
           <a
             href="/location"
-            className="bg-yellow-800 text-white text-md px-6 py-3 rounded-lg hover:bg-yellow-900 transition-colors font-medium shadow-md"
+            className="bg-yellow-800 opacity-80 text-white text-md px-6 px-4 py-1 rounded-[2px] hover:opacity-100 transition-opacity font-medium shadow-xl"
           >
             Where We Are
           </a>

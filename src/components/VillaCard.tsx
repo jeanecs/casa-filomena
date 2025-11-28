@@ -52,7 +52,7 @@ export function VillaCard({ villa, onBookingSubmit }: VillaCardProps) {
         
         <CardContent className="p-6">
           <div className="mb-4">
-            <h3 className="text-xl font-bold mb-2">{villa.name}</h3>
+            <h3 className="text-yellow-800 text-xl font-bold mb-2">{villa.name}</h3>
             <p className="text-gray-600 line-clamp-2">{villa.description}</p>
           </div>
 
@@ -86,7 +86,7 @@ export function VillaCard({ villa, onBookingSubmit }: VillaCardProps) {
           </div>
 
           <Button 
-            className="w-full bg-yellow-800 text-white text-md px-6 py-3 rounded-lg hover:bg-yellow-900 transition-colors font-medium shadow-md font-serifDisplay" 
+            className="w-full bg-yellow-800 text-white text-md px-4 py-1 rounded-[2px] hover:bg-yellow-900 transition-colors font-medium shadow-md font-serifDisplay" 
             onClick={() => setIsBookingOpen(true)}
           >
             <Calendar className="w-4 h-4 mr-2" />

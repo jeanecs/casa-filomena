@@ -99,9 +99,9 @@ export function VillaTour() {
           and heartfelt service—creating memories that will stay with you long after your visit.
         </p>
 
-        <div className="mt-8">
+        <div className="mt-40">
           <Link href="/location">
-            <button className="bg-yellow-800 text-white text-lg px-6 py-3 rounded-lg hover:bg-yellow-900 transition-colors font-medium shadow-md">
+            <button className="bg-yellow-800 text-white text-lg px-4 py-1 rounded-[2px] hover:bg-yellow-900 transition-colors font-medium shadow-xl">
               Find out where we are
             </button>
           </Link>

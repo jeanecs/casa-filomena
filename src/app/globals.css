@@ -120,11 +120,7 @@
   * {
     @apply border-border outline-ring/50;
   }
-  body {
-    font-family: var(--font-gideon); /* Apply Gideon Roman for body text */
-    @apply bg-background text-foreground;
-  }
-  h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-serif-display); /* Apply DM Serif Display for headers */
+  body { /* Apply Gideon Roman for body text */
+    font-family: var(--font-lora);
   }
 }

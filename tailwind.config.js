@@ -8,8 +8,7 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        serifDisplay: ['DM Serif Display', 'serif'],
-        gideon: ['Gideon Roman', 'serif'],
+        gideon: ['var(--font-lora)'],
       },
     },
   },
