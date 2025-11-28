@@ -39,7 +39,7 @@ export function VillaTour() {
   }, []);
 
   return (
-    <div className="flex flex-col md:flex-row items-start gap-6 p-6 m-6 rounded-lg scale-90">
+    <div className="flex flex-col md:flex-row items-start gap-6 p-6 mt-24 mb-24 rounded-lg scale-90">
       {/* Carousel Section */}
       <div className="w-full md:w-1/3 relative">
         <div className="aspect-[1/1] bg-black rounded-[3px] overflow-hidden relative">

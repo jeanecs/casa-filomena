@@ -37,7 +37,7 @@ export function VillaShowcase() {
     <section id="villas" className="py-20 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4">
         <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold">Our Luxury Villas</h2>
+          <h2 className="text-yellow-800 text-4xl font-bold">Our Luxury Villas</h2>
           <p className="text-xl text-gray-600">
             Choose from our collection of premium villas.
           </p>

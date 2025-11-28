@@ -8,7 +8,8 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        cinzel: ['"Cinzel Decorative"', 'serif'], // <-- add this
+        serifDisplay: ['DM Serif Display', 'serif'],
+        gideon: ['Gideon Roman', 'serif'],
       },
     },
   },

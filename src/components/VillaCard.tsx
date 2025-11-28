@@ -86,7 +86,7 @@ export function VillaCard({ villa, onBookingSubmit }: VillaCardProps) {
           </div>
 
           <Button 
-            className="w-full" 
+            className="w-full bg-yellow-800 text-white text-md px-6 py-3 rounded-lg hover:bg-yellow-900 transition-colors font-medium shadow-md font-serifDisplay" 
             onClick={() => setIsBookingOpen(true)}
           >
             <Calendar className="w-4 h-4 mr-2" />

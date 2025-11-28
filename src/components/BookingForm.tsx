@@ -147,8 +147,8 @@ export function BookingForm({ villa, isOpen, onClose, onBookingSubmit }: Booking
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2">
-            <Calendar className="w-5 h-5" />
-            <span>Book {villa.name}</span>
+            <Calendar className="w-5 h-5 text-yellow-800" />
+            <span className="text-yellow-800">Book {villa.name}</span>
           </DialogTitle>
           <DialogDescription>
             {step === 'dates' && 'Select your check-in and check-out dates to book this villa.'}
@@ -221,7 +221,7 @@ export function BookingForm({ villa, isOpen, onClose, onBookingSubmit }: Booking
 
             <div className="flex justify-end space-x-2">
               <Button variant="outline" onClick={handleClose}>Cancel</Button>
-              <Button onClick={handleDateSubmit} disabled={!isRangeAvailable}>
+              <Button onClick={handleDateSubmit} disabled={!isRangeAvailable} className="bg-yellow-800 text-white text-md px-6 py-3 rounded-lg hover:bg-yellow-900 transition-colors font-medium shadow-md font-serifDisplay">
                 Continue
               </Button>
             </div>
@@ -286,7 +286,7 @@ export function BookingForm({ villa, isOpen, onClose, onBookingSubmit }: Booking
               <Button variant="outline" onClick={() => setStep('dates')}>
                 Back
               </Button>
-              <Button onClick={handleBookingSubmit}>
+              <Button onClick={handleBookingSubmit} className="bg-yellow-800 text-white text-md px-6 py-3 rounded-lg hover:bg-yellow-900 transition-colors font-medium shadow-md font-serifDisplay">
                 <CreditCard className="w-4 h-4 mr-2" />
                 Submit Booking Request
               </Button>

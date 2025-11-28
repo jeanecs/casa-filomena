@@ -59,7 +59,7 @@ export function BulletinBoard({ isAdmin }: BulletinBoardProps) {
     <section id="bulletin" className="py-20 bg-white">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-gray-900 mb-4">Resort Bulletin</h2>
+          <h2 className="text-4xl font-bold text-yellow-800 mb-4">Resort Bulletin</h2>
           <p className="text-xl text-gray-600">
             Stay informed with the latest updates and announcements
           </p>
@@ -89,7 +89,7 @@ export function BulletinBoard({ isAdmin }: BulletinBoardProps) {
             <Card key={post.id} className="hover:shadow-md transition-shadow">
               <CardHeader>
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
-                  <CardTitle className="text-xl">{post.title}</CardTitle>
+                  <CardTitle className="text-xl text-yellow-800">{post.title}</CardTitle>
                   <Badge className={getPriorityColor(post.priority)}>
                     {post.priority.charAt(0).toUpperCase() + post.priority.slice(1)}
                   </Badge>
