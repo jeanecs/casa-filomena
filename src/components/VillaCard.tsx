@@ -36,7 +36,7 @@ export function VillaCard({ villa, onBookingSubmit }: VillaCardProps) {
 
   return (
     <>
-      <Card className="overflow-hidden hover:shadow-lg transition-shadow">
+      <Card className="overflow-hidden hover:shadow-lg transition-shadow rounded-[1px]">
         <div className="relative h-64">
           <ImageWithFallback
             src={villa.image}

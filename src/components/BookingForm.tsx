@@ -144,7 +144,7 @@ export function BookingForm({ villa, isOpen, onClose, onBookingSubmit }: Booking
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl rounded-[1px]">
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2">
             <Calendar className="w-5 h-5 text-yellow-800" />

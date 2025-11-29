@@ -9,7 +9,7 @@ export default function Location() {
   return (
     <div className="flex flex-col md:flex-row items-start gap-6 mx-auto max-w-4xl my-10">
       {/* Map Section */}
-      <div className="w-[400px] h-[500px] rounded-lg overflow-hidden shadow-md">
+      <div className="w-[400px] h-[500px] rounded-[1px] overflow-hidden shadow-md">
         <MapWithNoSSR />
       </div>
 
