@@ -1,14 +1,17 @@
 # Web Dev 2 Group Project — Setup Guide
 
-<div align="center">
+
 This project is a **Villa Rental Management System** built with Next.js 15, TypeScript, Prisma (SQLite), and includes both a public booking interface and an admin management panel.
 
+<div align="center">
 ![MySQL](https://img.shields.io/badge/mysql-4479A1.svg?style=for-the-badge&logo=mysql&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/javascript-%23323330.svg?style=for-the-badge&logo=javascript&logoColor=%23F7DF1E)
 ![NodeJS](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white)
 ![Next JS](https://img.shields.io/badge/Next-black?style=for-the-badge&logo=next.js&logoColor=white)
 ![React](https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB)
 ![TailwindCSS](https://img.shields.io/badge/tailwindcss-%2338B2AC.svg?style=for-the-badge&logo=tailwind-css&logoColor=white)
+</div>
+
 
 ## Screenshots
 
@@ -18,7 +21,7 @@ This project is a **Villa Rental Management System** built with Next.js 15, Type
 <img src="public/screenshots/Screenshot 2025-11-28 221954.png" alt="Bulletin Board" width="800"/>
 <img src="public/screenshots/Screenshot 2025-11-28 222002.png" alt="Villa Showcase" width="800"/>
 <img src="public/screenshots/Screenshot 2025-11-28 222009.png" alt="Location Page" width="800"/>
-</div>
+
 
 ## Architecture Overview
 
