@@ -2,6 +2,15 @@
 
 This project is a **Villa Rental Management System** built with Next.js 15, TypeScript, Prisma (SQLite), and includes both a public booking interface and an admin management panel.
 
+## Screenshots
+
+<img src="public/screenshots/Screenshot 2025-11-28 221925.png" alt="Hero Page" width="800"/>
+<img src="public/screenshots/Screenshot 2025-11-28 221937.png" alt="Villa Tour" width="800"/>
+<img src="public/screenshots/Screenshot 2025-11-28 221947.png" alt="Villa Portal" width="800"/>
+<img src="public/screenshots/Screenshot 2025-11-28 221954.png" alt="Bulletin Board" width="800"/>
+<img src="public/screenshots/Screenshot 2025-11-28 222002.png" alt="Villa Showcase" width="800"/>
+<img src="public/screenshots/Screenshot 2025-11-28 222009.png" alt="Location Page" width="800"/>
+
 ## Architecture Overview
 
 ```
