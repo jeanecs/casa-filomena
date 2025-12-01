@@ -1,6 +1,6 @@
-<div align="center">
 # Web Dev 2 Group Project — Setup Guide
 
+<div align="center">
 This project is a **Villa Rental Management System** built with Next.js 15, TypeScript, Prisma (SQLite), and includes both a public booking interface and an admin management panel.
 
 ![MySQL](https://img.shields.io/badge/mysql-4479A1.svg?style=for-the-badge&logo=mysql&logoColor=white)
