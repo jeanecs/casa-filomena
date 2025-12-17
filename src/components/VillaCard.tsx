@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent } from './ui/card';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
@@ -11,10 +11,19 @@ import { Booking } from '../../prisma/data/bookings';
 interface VillaCardProps {
   villa: Villa;
   onBookingSubmit?: (booking: Omit<Booking, 'id' | 'createdAt'>) => void;
+  preselectedDates?: { checkIn: string; checkOut: string; guests: number; nights: number };
+  autoOpenBooking?: boolean;
 }
 
-export function VillaCard({ villa, onBookingSubmit }: VillaCardProps) {
+export function VillaCard({ villa, onBookingSubmit, preselectedDates, autoOpenBooking }: VillaCardProps) {
   const [isBookingOpen, setIsBookingOpen] = useState(false);
+
+  // Auto-open booking form if redirected from hero widget
+  useEffect(() => {
+    if (autoOpenBooking) {
+      setIsBookingOpen(true);
+    }
+  }, [autoOpenBooking]);
 
   const getAmenityIcon = (amenity: string) => {
     switch (amenity.toLowerCase()) {
@@ -100,6 +109,7 @@ export function VillaCard({ villa, onBookingSubmit }: VillaCardProps) {
         isOpen={isBookingOpen}
         onClose={() => setIsBookingOpen(false)}
         onBookingSubmit={handleBookingSubmit}
+        preselectedDates={preselectedDates}
       />
     </>
   );

@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { sendBookingEmail } from '@/lib/mailer'
+import { bookingEmailTemplate } from '@/lib/emailTemplates'
 
 export async function POST(req: Request) {
   try {
@@ -23,6 +25,13 @@ export async function POST(req: Request) {
         villa: true, // Include villa details in response
       },
     })
+
+    try {
+      const { subject, html } = await bookingEmailTemplate(booking)
+      await sendBookingEmail(booking.guestEmail, subject, html)
+    } catch (emailErr) {
+      console.error('Failed to send booking email', emailErr)
+    }
 
     return NextResponse.json(booking)
   } catch (err: any) {

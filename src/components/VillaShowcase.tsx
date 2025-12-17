@@ -1,12 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { VillaCard } from "../components/VillaCard";
 import { toast } from "sonner";
 
 export function VillaShowcase() {
   const [villas, setVillas] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const searchParams = useSearchParams();
+
+  // Extract query parameters from URL
+  const selectedVillaId = searchParams?.get("villa") ? parseInt(searchParams.get("villa")!) : null;
+  const checkIn = searchParams?.get("checkIn") || null;
+  const checkOut = searchParams?.get("checkOut") || null;
+  const guests = searchParams?.get("guests") ? parseInt(searchParams.get("guests")!) : null;
+  const nights = searchParams?.get("nights") ? parseInt(searchParams.get("nights")!) : null;
 
   useEffect(() => {
     async function loadVillas() {
@@ -49,6 +58,12 @@ export function VillaShowcase() {
               key={villa.id}
               villa={villa}
               onBookingSubmit={handleBookingSubmit}
+              preselectedDates={
+                selectedVillaId === villa.id && checkIn && checkOut
+                  ? { checkIn, checkOut, guests: guests || 2, nights: nights || 0 }
+                  : undefined
+              }
+              autoOpenBooking={selectedVillaId === villa.id && checkIn && checkOut}
             />
           ))}
         </div>

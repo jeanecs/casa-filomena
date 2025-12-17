@@ -21,9 +21,10 @@ interface BookingFormProps {
   isOpen: boolean;
   onClose: () => void;
   onBookingSubmit?: (booking: any) => void;
+  preselectedDates?: { checkIn: string; checkOut: string; guests: number; nights: number };
 }
 
-export function BookingForm({ villa: initialVilla, isOpen, onClose, onBookingSubmit }: BookingFormProps) {
+export function BookingForm({ villa: initialVilla, isOpen, onClose, onBookingSubmit, preselectedDates }: BookingFormProps) {
   const [villas, setVillas] = useState<Villa[]>([]);
   const [selectedVilla, setSelectedVilla] = useState<Villa | null>(initialVilla || null);
   const [checkIn, setCheckIn] = useState('');
@@ -36,6 +37,16 @@ export function BookingForm({ villa: initialVilla, isOpen, onClose, onBookingSub
   const [step, setStep] = useState<'villa' | 'dates' | 'details' | 'confirmation'>(!initialVilla ? 'villa' : 'dates');
   const [showCalendar, setShowCalendar] = useState(false);
   const [totalPrice, setTotalPrice] = useState(0);
+
+  // Initialize with preselected dates if provided
+  useEffect(() => {
+    if (preselectedDates && preselectedDates.checkIn && preselectedDates.checkOut) {
+      setCheckIn(preselectedDates.checkIn);
+      setCheckOut(preselectedDates.checkOut);
+      setGuests(preselectedDates.guests || 2);
+      setStep('details'); // Skip to details step since dates are pre-filled
+    }
+  }, [preselectedDates]);
 
   // Fetch villas if not provided
   useEffect(() => {
