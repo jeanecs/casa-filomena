@@ -100,7 +100,21 @@ ADMIN_USERNAME="admin@casa"
 ADMIN_PASSWORD="password"
 NEXTAUTH_SECRET="zZefb+zgLV0Ex6KcRJZg37slUVpfg2+8DNk0Q2gulPQ="
 NEXTAUTH_URL="http://localhost:3000"
+
+# Email/SMTP Configuration (for booking confirmations)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=465
+SMTP_SECURE=true
+SMTP_USER=your-email@gmail.com
+SMTP_PASS=your-app-password
+MAIL_FROM="Villa Bookings <bookings@yourdomain.com>"
 ```
+
+### Gmail App Password Setup:
+1. Enable 2-Step Verification on your Google Account
+2. Go to **App Passwords** (Security → App passwords)
+3. Select "Mail" and "Windows Computer"
+4. Copy the 16-character password and set as `SMTP_PASS`
 
 ## 3) Set Up the Database (Prisma)
 
@@ -198,8 +212,12 @@ model BookingDate {
 
 ### Public Endpoints
 - `GET /api/villas` - Get all villas
-- `POST /api/VillaBooking` - Create new booking
+- `POST /api/VillaBooking` - Create new booking (sends confirmation email)
+- `GET /api/VillaBooking` - Get all bookings
+- `PATCH /api/VillaBooking/[id]` - Update booking status (sends status email)
 - `GET /api/availability` - Get availability calendar
+- `GET /api/availability/[villaId]` - Get villa-specific availability
+- `GET /api/posts` - Get bulletin board posts
 
 ### Admin Endpoints
 - `GET/POST /api/admin/villas` - Villa management
@@ -211,18 +229,24 @@ model BookingDate {
 ## Features
 
 ### Public Features
-- Villa browsing and details
-- Availability calendar
-- Booking system
-- Responsive design
+- **Villa Browsing**: Showcase all luxury villas with amenities
+- **Hero Booking Widget**: Quick search with villa, date, and guest selection
+- **Smart Booking Redirect**: Hero widget redirects to villas page with pre-filled dates and villa selection
+- **Availability Calendar**: Date-picker with blocked/available date tracking
+- **Booking System**: Multi-step booking form with guest information
+- **Email Confirmations**: Automated booking confirmations and status updates
+- **QR Codes for Payment**: Payment QR codes on confirmed bookings
+- **Responsive Design**: Mobile-first, works on all devices
+- **Bulletin Board**: Latest updates and announcements with auto-scrolling marquee
 
 ### Admin Features
-- **Villa Management**: Add, edit, delete villas
-- **Booking Management**: View and manage all bookings
+- **Villa Management**: Add, edit, delete villas with images and amenities
+- **Booking Management**: View, filter, and update booking statuses
+- **Delete Confirmation**: Dialog confirmation for safe data deletion
 - **Availability Management**: Calendar-based availability control
 - **Pricing Management**: Dynamic pricing per date
 - **Bulk Operations**: Block/unblock multiple dates
-- **Status Management**: Confirm/cancel bookings
+- **Status Management**: Confirm/cancel bookings with automatic email notifications
 
 ## Common Scripts
 
@@ -239,9 +263,55 @@ npx prisma studio     # Visual DB browser
 npx prisma db push    # Push schema changes
 npx prisma db seed    # Seed database
 
+# Email Testing
+npm run mail:ethereal  # Generate Ethereal test account credentials
+npm run mail:test      # Send test email with current SMTP config
+
 # Utilities
 npm run lint          # Run ESLint
 npm run type-check    # TypeScript checking
+```
+
+## Email Functionality
+
+### How It Works
+- **On Booking Create** (`POST /api/VillaBooking`): Sends confirmation email with booking reference and details
+- **On Status Update** (`PATCH /api/VillaBooking/[id]`): Sends status update email (PENDING → CONFIRMED → CANCELLED)
+- **Booking Reference**: Format `VLB25000001` (VLB + year + booking ID)
+- **Confirmed Bookings**: Include payment QR code that guests can scan
+
+### Email Templates
+Located in `src/lib/emailTemplates.ts`:
+- `bookingEmailTemplate()` - Unified template for all booking statuses
+- Customizable per status: PENDING, CONFIRMED, CANCELLED
+- Includes booking details, dates, guest count, and total price
+- QR code embedded for CONFIRMED bookings
+
+### Testing Email Configuration
+```bash
+# 1. Generate test account (optional, uses Ethereal)
+npm run mail:ethereal
+
+# 2. Copy printed credentials to .env
+
+# 3. Restart dev server
+npm run dev
+
+# 4. Send test email
+npm run mail:test
+
+# 5. Open Ethereal preview URL from console output
+```
+
+### Production Email Setup
+For production, configure real SMTP credentials:
+```env
+SMTP_HOST=your-smtp-server.com
+SMTP_PORT=587
+SMTP_SECURE=false  # or true for port 465
+SMTP_USER=your-username
+SMTP_PASS=your-password
+MAIL_FROM="Villa Bookings <no-reply@yourdomain.com>"
 ```
 
 ## Development Workflow
@@ -258,6 +328,18 @@ npm run type-check    # TypeScript checking
 2. **API Routes**: Create in `src/app/api/`
 3. **Components**: Add to `src/components/`
 4. **Pages**: Add to `src/app/`
+
+### Booking Widget Redirect Flow
+
+The hero booking widget implements a smart redirect:
+
+1. User fills villa, dates, guests in hero widget
+2. Click "Search" button
+3. Redirect to `/villas?villa=2&checkIn=2025-12-20&checkOut=2025-12-23&guests=2&nights=3`
+4. VillaShowcase reads query params
+5. VillaCard matches selected villa
+6. BookingForm auto-opens with pre-filled dates
+7. User only needs to enter guest details
 
 ### Common Issues & Solutions
 
