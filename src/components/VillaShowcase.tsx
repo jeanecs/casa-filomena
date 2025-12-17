@@ -63,7 +63,7 @@ export function VillaShowcase() {
                   ? { checkIn, checkOut, guests: guests || 2, nights: nights || 0 }
                   : undefined
               }
-              autoOpenBooking={selectedVillaId === villa.id && checkIn && checkOut}
+              autoOpenBooking={!!(selectedVillaId === villa.id && checkIn && checkOut)}
             />
           ))}
         </div>

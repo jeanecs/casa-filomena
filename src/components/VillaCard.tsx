@@ -83,7 +83,7 @@ export function VillaCard({ villa, onBookingSubmit, preselectedDates, autoOpenBo
           <div className="mb-6">
             <div className="flex flex-wrap gap-2">
               {(typeof villa.amenities === "string" 
-                ? villa.amenities.split(",") 
+                ? (villa.amenities as string).split(",") 
                 : villa.amenities
               ).map((amenity: string) => (
                 <Badge key={amenity} variant="secondary" className="flex items-center space-x-1">

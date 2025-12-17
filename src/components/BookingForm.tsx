@@ -253,15 +253,23 @@ export function BookingForm({ villa: initialVilla, isOpen, onClose, onBookingSub
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-medium text-gray-600 mb-1">Check-in</label>
-                    <div className="px-3 py-2 border border-gray-300 rounded-lg bg-gray-50">
+                    <button
+                      type="button"
+                      onClick={() => setShowCalendar(true)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 text-left cursor-pointer transition-colors"
+                    >
                       {checkIn ? new Date(checkIn).toLocaleDateString() : 'Select date'}
-                    </div>
+                    </button>
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-gray-600 mb-1">Check-out</label>
-                    <div className="px-3 py-2 border border-gray-300 rounded-lg bg-gray-50">
+                    <button
+                      type="button"
+                      onClick={() => setShowCalendar(true)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 text-left cursor-pointer transition-colors"
+                    >
                       {checkOut ? new Date(checkOut).toLocaleDateString() : 'Select date'}
-                    </div>
+                    </button>
                   </div>
                 </div>
               )}
