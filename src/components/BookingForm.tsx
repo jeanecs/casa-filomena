@@ -1,4 +1,6 @@
-import { useState } from 'react';
+"use client";
+
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -6,25 +8,24 @@ import { Textarea } from './ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './ui/dialog';
 import { Calendar, User, Mail, Phone, CreditCard } from 'lucide-react';
 import { toast } from 'sonner';
-import { Villa } from '../../prisma/data/villas';
-import { 
-  BookingDate, 
-  Booking, 
-  VillaAvailability, 
-  initialAvailability,
-  formatPrice,
-  calculateTotalPrice,
-  isDateRangeAvailable
-} from '../../prisma/data/bookings';
+import { DatePicker } from './DatePicker';
 
-interface BookingFormProps {
-  villa: Villa;
-  isOpen: boolean;
-  onClose: () => void;
-  onBookingSubmit: (booking: Omit<Booking, 'id' | 'createdAt'>) => void;
+interface Villa {
+  id: number;
+  name: string;
+  guests: number;
 }
 
-export function BookingForm({ villa, isOpen, onClose, onBookingSubmit }: BookingFormProps) {
+interface BookingFormProps {
+  villa?: Villa;
+  isOpen: boolean;
+  onClose: () => void;
+  onBookingSubmit?: (booking: any) => void;
+}
+
+export function BookingForm({ villa: initialVilla, isOpen, onClose, onBookingSubmit }: BookingFormProps) {
+  const [villas, setVillas] = useState<Villa[]>([]);
+  const [selectedVilla, setSelectedVilla] = useState<Villa | null>(initialVilla || null);
   const [checkIn, setCheckIn] = useState('');
   const [checkOut, setCheckOut] = useState('');
   const [guests, setGuests] = useState(2);
@@ -32,20 +33,58 @@ export function BookingForm({ villa, isOpen, onClose, onBookingSubmit }: Booking
   const [guestEmail, setGuestEmail] = useState('');
   const [guestPhone, setGuestPhone] = useState('');
   const [notes, setNotes] = useState('');
-  const [step, setStep] = useState<'dates' | 'details' | 'confirmation'>('dates');
+  const [step, setStep] = useState<'villa' | 'dates' | 'details' | 'confirmation'>(!initialVilla ? 'villa' : 'dates');
+  const [showCalendar, setShowCalendar] = useState(false);
+  const [totalPrice, setTotalPrice] = useState(0);
 
-  const villaAvailability = initialAvailability.find(a => a.villaId === villa.id);
-  const totalPrice = villaAvailability && checkIn && checkOut 
-    ? calculateTotalPrice(villaAvailability.dates, checkIn, checkOut)
-    : 0;
+  // Fetch villas if not provided
+  useEffect(() => {
+    if (!initialVilla) {
+      async function fetchVillas() {
+        try {
+          const res = await fetch('/api/villas');
+          const data = await res.json();
+          setVillas(data);
+          if (data.length > 0) {
+            setSelectedVilla(data[0]);
+          }
+        } catch (error) {
+          console.error('Error fetching villas:', error);
+        }
+      }
+      fetchVillas();
+    }
+  }, [initialVilla]);
 
-  const isRangeAvailable = villaAvailability && checkIn && checkOut
-    ? isDateRangeAvailable(villaAvailability.dates, checkIn, checkOut)
-    : false;
+  // Calculate total price based on nights and a base rate
+  const calculatePrice = () => {
+    if (!checkIn || !checkOut) return 0;
+    const nights = Math.ceil((new Date(checkOut).getTime() - new Date(checkIn).getTime()) / (1000 * 60 * 60 * 24));
+    // Base rate: $200 per night (you can adjust this or fetch from backend)
+    return nights * 200;
+  };
+
+  useEffect(() => {
+    setTotalPrice(calculatePrice());
+  }, [checkIn, checkOut]);
+
+  const handleDateSelect = (startDate: string, endDate: string) => {
+    setCheckIn(startDate);
+    setCheckOut(endDate);
+    setShowCalendar(false);
+  };
 
   const numberOfNights = checkIn && checkOut 
     ? Math.ceil((new Date(checkOut).getTime() - new Date(checkIn).getTime()) / (1000 * 60 * 60 * 24))
     : 0;
+
+  const handleVillaSubmit = () => {
+    if (!selectedVilla) {
+      toast.error("Please select a villa");
+      return;
+    }
+    setStep('dates');
+  };
 
   const handleDateSubmit = () => {
     if (!checkIn || !checkOut) {
@@ -58,13 +97,8 @@ export function BookingForm({ villa, isOpen, onClose, onBookingSubmit }: Booking
       return;
     }
 
-    if (!isRangeAvailable) {
-      toast.error("Selected dates are not available");
-      return;
-    }
-
-    if (guests > villa.guests) {
-      toast.error(`Maximum guests for this villa is ${villa.guests}`);
+    if (guests > (selectedVilla?.guests || 10)) {
+      toast.error(`Maximum guests for this villa is ${selectedVilla?.guests}`);
       return;
     }
 
@@ -77,8 +111,13 @@ export function BookingForm({ villa, isOpen, onClose, onBookingSubmit }: Booking
       return;
     }
 
+    if (!selectedVilla) {
+      toast.error("Please select a villa");
+      return;
+    }
+
     const booking = {
-      villaId: villa.id,
+      villaId: selectedVilla.id,
       guestName,
       guestEmail,
       guestPhone,
@@ -91,7 +130,6 @@ export function BookingForm({ villa, isOpen, onClose, onBookingSubmit }: Booking
     };
 
     try {
-      // Call your API route here
       const response = await fetch('/api/VillaBooking', {
         method: 'POST',
         headers: {
@@ -103,7 +141,9 @@ export function BookingForm({ villa, isOpen, onClose, onBookingSubmit }: Booking
       if (response.ok) {
         const newBooking = await response.json();
         toast.success("Booking submitted successfully!");
-        onBookingSubmit(newBooking); // Pass to parent component
+        if (onBookingSubmit) {
+          onBookingSubmit(newBooking);
+        }
         setStep('confirmation');
       } else {
         toast.error("Failed to submit booking");
@@ -121,25 +161,12 @@ export function BookingForm({ villa, isOpen, onClose, onBookingSubmit }: Booking
     setGuestEmail('');
     setGuestPhone('');
     setNotes('');
-    setStep('dates');
+    setStep(!initialVilla ? 'villa' : 'dates');
   };
 
   const handleClose = () => {
     resetForm();
     onClose();
-  };
-
-  // Generate available dates for next 3 months
-  const getMinDate = () => {
-    const today = new Date();
-    today.setDate(today.getDate() + 1); // Start from tomorrow
-    return today.toISOString().split('T')[0];
-  };
-
-  const getMaxDate = () => {
-    const maxDate = new Date();
-    maxDate.setMonth(maxDate.getMonth() + 3);
-    return maxDate.toISOString().split('T')[0];
   };
 
   return (
@@ -148,38 +175,92 @@ export function BookingForm({ villa, isOpen, onClose, onBookingSubmit }: Booking
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2">
             <Calendar className="w-5 h-5 text-yellow-800" />
-            <span className="text-yellow-800">Book {villa.name}</span>
+            <span className="text-yellow-800">Book Your Stay</span>
           </DialogTitle>
           <DialogDescription>
-            {step === 'dates' && 'Select your check-in and check-out dates to book this villa.'}
+            {step === 'villa' && 'Select a villa to get started.'}
+            {step === 'dates' && 'Select your check-in and check-out dates.'}
             {step === 'details' && 'Please provide your contact information to complete the booking.'}
             {step === 'confirmation' && 'Your booking request has been submitted successfully.'}
           </DialogDescription>
         </DialogHeader>
 
-        {step === 'dates' && (
+        {step === 'villa' && (
           <div className="space-y-6">
-            <div className="grid md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">Check-in Date</label>
-                <Input
-                  type="date"
-                  value={checkIn}
-                  onChange={(e) => setCheckIn(e.target.value)}
-                  min={getMinDate()}
-                  max={getMaxDate()}
-                />
+            <div>
+              <label className="block text-sm font-semibold mb-2">Select Villa</label>
+              <select
+                value={selectedVilla?.id || ''}
+                onChange={(e) => {
+                  const villa = villas.find(v => v.id === parseInt(e.target.value));
+                  setSelectedVilla(villa || null);
+                }}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-800"
+              >
+                <option value="">Choose a villa...</option>
+                {villas.map((villa) => (
+                  <option key={villa.id} value={villa.id}>
+                    {villa.name} (up to {villa.guests} guests)
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex justify-end space-x-2">
+              <Button variant="outline" onClick={handleClose} className="px-4 py-1 rounded-[2px]">
+                Cancel
+              </Button>
+              <Button
+                onClick={handleVillaSubmit}
+                disabled={!selectedVilla}
+                className="bg-yellow-800 opacity-80 text-white text-md px-6 py-1 rounded-[2px] hover:opacity-100 transition-opacity font-medium shadow-xl disabled:opacity-50"
+              >
+                Continue
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {step === 'dates' && selectedVilla && (
+          <div className="space-y-6">
+            <div className="bg-blue-50 p-3 rounded-lg">
+              <p className="text-sm font-medium">Selected Villa: <span className="text-yellow-800">{selectedVilla.name}</span></p>
+            </div>
+
+            <div>
+              <div className="flex justify-between items-center mb-2">
+                <label className="block text-sm font-semibold">Select Dates</label>
+                <button
+                  onClick={() => setShowCalendar(!showCalendar)}
+                  className="text-xs text-yellow-800 hover:underline"
+                >
+                  {showCalendar ? 'Hide' : 'Show'} Calendar
+                </button>
               </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">Check-out Date</label>
-                <Input
-                  type="date"
-                  value={checkOut}
-                  onChange={(e) => setCheckOut(e.target.value)}
-                  min={checkIn || getMinDate()}
-                  max={getMaxDate()}
+
+              {!showCalendar && (
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">Check-in</label>
+                    <div className="px-3 py-2 border border-gray-300 rounded-lg bg-gray-50">
+                      {checkIn ? new Date(checkIn).toLocaleDateString() : 'Select date'}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">Check-out</label>
+                    <div className="px-3 py-2 border border-gray-300 rounded-lg bg-gray-50">
+                      {checkOut ? new Date(checkOut).toLocaleDateString() : 'Select date'}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {showCalendar && (
+                <DatePicker
+                  villaId={selectedVilla.id}
+                  onDateSelect={handleDateSelect}
                 />
-              </div>
+              )}
             </div>
 
             <div>
@@ -187,11 +268,11 @@ export function BookingForm({ villa, isOpen, onClose, onBookingSubmit }: Booking
               <Input
                 type="number"
                 value={guests}
-                onChange={(e) => setGuests(parseInt(e.target.value) || 2)}
+                onChange={(e) => setGuests(Math.max(1, parseInt(e.target.value) || 1))}
                 min="1"
-                max={villa.guests}
+                max={selectedVilla.guests}
               />
-              <p className="text-sm text-gray-600 mt-1">Maximum {villa.guests} guests</p>
+              <p className="text-sm text-gray-600 mt-1">Maximum {selectedVilla.guests} guests</p>
             </div>
 
             {checkIn && checkOut && (
@@ -202,27 +283,24 @@ export function BookingForm({ villa, isOpen, onClose, onBookingSubmit }: Booking
                       <span>Duration:</span>
                       <span>{numberOfNights} night{numberOfNights !== 1 ? 's' : ''}</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span>Availability:</span>
-                      <span className={isRangeAvailable ? 'text-green-600' : 'text-red-600'}>
-                        {isRangeAvailable ? 'Available' : 'Not Available'}
-                      </span>
+                    <div className="flex justify-between font-medium border-t pt-2">
+                      <span>Estimated Total:</span>
+                      <span className="text-yellow-800">${totalPrice}</span>
                     </div>
-                    {isRangeAvailable && (
-                      <div className="flex justify-between font-medium border-t pt-2">
-                        <span>Total Price:</span>
-                        <span>{formatPrice(totalPrice)}</span>
-                      </div>
-                    )}
                   </div>
                 </CardContent>
               </Card>
             )}
 
             <div className="flex justify-end space-x-2">
-              <Button variant="outline" onClick={handleClose} className="px-4 py-1 rounded-[2px]">Cancel</Button>
-              <Button onClick={handleDateSubmit} disabled={!isRangeAvailable} className="bg-yellow-800 opacity-80 text-white text-md px-6 px-4 py-1 rounded-[2px] hover:opacity-100 transition-opacity font-medium shadow-xl"
->
+              <Button variant="outline" onClick={() => setStep('villa')} className="px-4 py-1 rounded-[2px]">
+                Back
+              </Button>
+              <Button
+                onClick={handleDateSubmit}
+                disabled={!checkIn || !checkOut}
+                className="bg-yellow-800 opacity-80 text-white text-md px-6 py-1 rounded-[2px] hover:opacity-100 transition-opacity font-medium shadow-xl disabled:opacity-50"
+              >
                 Continue
               </Button>
             </div>
@@ -234,11 +312,11 @@ export function BookingForm({ villa, isOpen, onClose, onBookingSubmit }: Booking
             <div className="bg-blue-50 p-4 rounded-lg">
               <h4 className="font-medium mb-2">Booking Summary</h4>
               <div className="text-sm space-y-1">
-                <div>Villa: {villa.name}</div>
+                <div>Villa: {selectedVilla?.name}</div>
                 <div>Check-in: {new Date(checkIn).toLocaleDateString()}</div>
                 <div>Check-out: {new Date(checkOut).toLocaleDateString()}</div>
                 <div>Guests: {guests}</div>
-                <div className="font-medium">Total: {formatPrice(totalPrice)}</div>
+                <div className="font-medium">Total: ${totalPrice}</div>
               </div>
             </div>
 
@@ -287,7 +365,7 @@ export function BookingForm({ villa, isOpen, onClose, onBookingSubmit }: Booking
               <Button variant="outline" onClick={() => setStep('dates')} className="px-4 py-1 rounded-[2px]">
                 Back
               </Button>
-              <Button onClick={handleBookingSubmit} className="bg-yellow-800 text-white text-md px-4 py-1 rounded-[2px] hover:bg-yellow-900 transition-colors font-medium shadow-md font-serifDisplay">
+              <Button onClick={handleBookingSubmit} className="bg-yellow-800 text-white text-md px-4 py-1 rounded-[2px] hover:bg-yellow-900 transition-colors font-medium shadow-md">
                 <CreditCard className="w-4 h-4 mr-2" />
                 Submit Booking Request
               </Button>
@@ -300,22 +378,22 @@ export function BookingForm({ villa, isOpen, onClose, onBookingSubmit }: Booking
             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
               <Calendar className="w-8 h-8 text-green-600" />
             </div>
-            
+
             <div>
               <h3 className="text-xl font-medium mb-2">Booking Request Submitted!</h3>
               <p className="text-gray-600 mb-4">
                 Thank you for your booking request. We'll review it and get back to you within 24 hours.
               </p>
-              
+
               <div className="bg-gray-50 p-4 rounded-lg text-left">
                 <h4 className="font-medium mb-2">Booking Details</h4>
                 <div className="text-sm space-y-1">
                   <div>Guest: {guestName}</div>
-                  <div>Villa: {villa.name}</div>
+                  <div>Villa: {selectedVilla?.name}</div>
                   <div>Check-in: {new Date(checkIn).toLocaleDateString()}</div>
                   <div>Check-out: {new Date(checkOut).toLocaleDateString()}</div>
                   <div>Guests: {guests}</div>
-                  <div className="font-medium">Total: {formatPrice(totalPrice)}</div>
+                  <div className="font-medium">Total: ${totalPrice}</div>
                 </div>
               </div>
             </div>

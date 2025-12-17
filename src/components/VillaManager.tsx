@@ -9,6 +9,7 @@ import { Badge } from "./ui/badge";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { Plus, Edit, Trash2, Save, X } from "lucide-react";
 import { toast } from "sonner";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog";
 import { Villa } from "../../prisma/data/villas";
 
 export function VillaManager() {
@@ -16,6 +17,7 @@ export function VillaManager() {
   const [editingVilla, setEditingVilla] = useState<Villa | null>(null);
   const [isAddingNew, setIsAddingNew] = useState(false);
   const [newAmenity, setNewAmenity] = useState("");
+  const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
 
   const emptyVilla: Omit<Villa, "id"> = {
     name: "",
@@ -84,6 +86,7 @@ export function VillaManager() {
       await fetch(`/admin/api/villas/${villaId}`, { method: "DELETE" });
       setVillas(villas.filter((v) => v.id !== villaId));
       toast.success("Villa deleted successfully");
+      setDeleteConfirm(null);
     } catch {
       toast.error("Failed to delete villa");
     }
@@ -260,7 +263,11 @@ export function VillaManager() {
                   <Button size="sm" variant="outline" onClick={() => handleEdit(villa)}>
                     <Edit className="w-4 h-4" />
                   </Button>
-                  <Button size="sm" variant="destructive" onClick={() => handleDelete(villa.id)}>
+                  <Button 
+                    size="sm" 
+                    onClick={() => setDeleteConfirm(villa.id)}
+                    className="bg-amber-700/20 hover:bg-amber-700/30 text-amber-700 border border-amber-700/30"
+                  >
                     <Trash2 className="w-4 h-4" />
                   </Button>
                 </div>
@@ -285,6 +292,32 @@ export function VillaManager() {
           </Card>
         ))}
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteConfirm !== null} onOpenChange={() => setDeleteConfirm(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Deletion</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this villa? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-2">
+            <Button 
+              variant="outline" 
+              onClick={() => setDeleteConfirm(null)}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={() => deleteConfirm !== null && handleDelete(deleteConfirm)}
+              className="bg-amber-700 hover:bg-amber-800 text-white"
+            >
+              Delete
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

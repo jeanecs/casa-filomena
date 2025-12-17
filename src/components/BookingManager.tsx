@@ -73,6 +73,7 @@ const formatPrice = (price: number) =>
 export function BookingManager() {
   const [availability, setAvailability] = useState<VillaAvailability[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
+  const [villas, setVillas] = useState<any[]>([]);
   const [selectedVilla, setSelectedVilla] = useState<number>(1);
   const [selectedDate, setSelectedDate] = useState<string>("");
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
@@ -91,19 +92,28 @@ export function BookingManager() {
       try {
         setLoading(true);
 
-        const [bookingsRes, availabilityRes] = await Promise.all([
+        const [bookingsRes, availabilityRes, villasRes] = await Promise.all([
           fetch("/api/VillaBooking"),
-          fetch("/api/availability"), // you’ll need to implement this route
+          fetch("/api/availability"), // you'll need to implement this route
+          fetch("/api/villas"),
         ]);
 
         if (!bookingsRes.ok) throw new Error("Failed to fetch bookings");
         if (!availabilityRes.ok) throw new Error("Failed to fetch availability");
+        if (!villasRes.ok) throw new Error("Failed to fetch villas");
 
         const bookingsData = await bookingsRes.json();
         const availabilityData = await availabilityRes.json();
+        const villasData = await villasRes.json();
 
         setBookings(bookingsData);
         setAvailability(availabilityData);
+        setVillas(villasData);
+        
+        // Set first villa as selected if available
+        if (villasData.length > 0) {
+          setSelectedVilla(villasData[0].id);
+        }
       } catch (err) {
         console.error(err);
         toast.error("Error loading data");
@@ -234,8 +244,11 @@ export function BookingManager() {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="1">Villa Serena</SelectItem>
-            <SelectItem value="2">Villa Azure</SelectItem>
+            {villas.map((villa) => (
+              <SelectItem key={villa.id} value={villa.id.toString()}>
+                {villa.name}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
