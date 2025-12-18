@@ -53,22 +53,29 @@ export function PricingManager({ villaId, onPricingChange }: { villaId: number; 
   const [customDate, setCustomDate] = useState("");
   const [customPrice, setCustomPrice] = useState<number>(0);
 
+  // Restore rules from localStorage on mount and when villa changes
   useEffect(() => {
-    fetchPricingData();
-    // Restore rules from localStorage so they persist across tab switches
     try {
       const key = `pricing_rules_villa_${villaId}`;
       const saved = localStorage.getItem(key);
-      if (saved) setPricingRules(JSON.parse(saved));
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setPricingRules(parsed);
+        }
+      }
     } catch {}
+    fetchPricingData();
   }, [villaId]);
 
   // Persist rules to localStorage whenever they change
   useEffect(() => {
-    try {
-      const key = `pricing_rules_villa_${villaId}`;
-      localStorage.setItem(key, JSON.stringify(pricingRules));
-    } catch {}
+    if (pricingRules.length > 0) {
+      try {
+        const key = `pricing_rules_villa_${villaId}`;
+        localStorage.setItem(key, JSON.stringify(pricingRules));
+      } catch {}
+    }
   }, [pricingRules, villaId]);
 
   const fetchPricingData = async () => {

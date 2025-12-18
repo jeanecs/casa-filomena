@@ -18,11 +18,10 @@ export async function GET(
       },
     })
 
-    // Get all blocked dates
-    const blockedDates = await prisma.bookingDate.findMany({
+    // Get all booking dates (blocked dates AND pricing data)
+    const allBookingDates = await prisma.bookingDate.findMany({
       where: {
         villaId: villaId,
-        isBlocked: true,
       },
     })
 
@@ -41,13 +40,24 @@ export async function GET(
     })
 
     // Add blocked dates
-    blockedDates.forEach((date) => {
-      unavailableDates.add(date.date.toISOString().split("T")[0])
+    allBookingDates.forEach((date) => {
+      if (date.isBlocked) {
+        unavailableDates.add(date.date.toISOString().split("T")[0])
+      }
     })
+
+    // Return pricing data for all configured dates
+    const pricingData = allBookingDates.map((d) => ({
+      date: d.date.toISOString().split("T")[0],
+      price: d.price,
+      available: d.available,
+      isBlocked: d.isBlocked,
+    }))
 
     return NextResponse.json({
       villaId,
       unavailableDates: Array.from(unavailableDates).sort(),
+      pricingData: pricingData,
       confirmedBookings: confirmedBookings.map((b) => ({
         checkIn: b.checkIn.toISOString().split("T")[0],
         checkOut: b.checkOut.toISOString().split("T")[0],

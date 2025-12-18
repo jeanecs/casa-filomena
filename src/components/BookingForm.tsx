@@ -67,17 +67,50 @@ export function BookingForm({ villa: initialVilla, isOpen, onClose, onBookingSub
     }
   }, [initialVilla]);
 
-  // Calculate total price based on nights and a base rate
-  const calculatePrice = () => {
-    if (!checkIn || !checkOut) return 0;
-    const nights = Math.ceil((new Date(checkOut).getTime() - new Date(checkIn).getTime()) / (1000 * 60 * 60 * 24));
-    // Base rate: $200 per night (you can adjust this or fetch from backend)
-    return nights * 200;
+  // Calculate total price based on actual configured prices
+  const calculatePrice = async () => {
+    if (!checkIn || !checkOut || !selectedVilla) return 0;
+    
+    try {
+      const response = await fetch(`/api/availability/${selectedVilla.id}`);
+      if (!response.ok) {
+        // Fallback to base rate if API fails
+        const nights = Math.ceil((new Date(checkOut).getTime() - new Date(checkIn).getTime()) / (1000 * 60 * 60 * 24));
+        return nights * 200;
+      }
+      
+      const data = await response.json();
+      let total = 0;
+      const start = new Date(checkIn);
+      const end = new Date(checkOut);
+      
+      // Sum up prices for each night in the date range
+      for (let d = new Date(start); d < end; d.setDate(d.getDate() + 1)) {
+        const dateStr = d.toISOString().split('T')[0];
+        
+        // Look for this specific date in pricingData array
+        const dateData = data.pricingData?.find((pd: any) => {
+          const pdDate = new Date(pd.date).toISOString().split('T')[0];
+          return pdDate === dateStr;
+        });
+        
+        // Use the configured price if found, otherwise use a default base rate
+        const dayPrice = dateData?.price || 150;
+        total += dayPrice;
+      }
+      
+      return total;
+    } catch (error) {
+      console.error('Error calculating price:', error);
+      // Fallback calculation
+      const nights = Math.ceil((new Date(checkOut).getTime() - new Date(checkIn).getTime()) / (1000 * 60 * 60 * 24));
+      return nights * 200;
+    }
   };
 
   useEffect(() => {
-    setTotalPrice(calculatePrice());
-  }, [checkIn, checkOut]);
+    calculatePrice().then(setTotalPrice);
+  }, [checkIn, checkOut, selectedVilla]);
 
   const handleDateSelect = (startDate: string, endDate: string) => {
     setCheckIn(startDate);

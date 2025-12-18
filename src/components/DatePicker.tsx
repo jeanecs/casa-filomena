@@ -20,6 +20,7 @@ export function DatePicker({
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [unavailableDates, setUnavailableDates] = useState<string[]>([]);
   const [datePrices, setDatePrices] = useState<Record<string, number>>({});
+  const [basePrice, setBasePrice] = useState<number>(150);
   const [loading, setLoading] = useState(true);
 
   // Fetch unavailable dates and per-day prices
@@ -37,15 +38,20 @@ export function DatePicker({
         // Build a map of date -> price for this villa
         const allDates = await pricesRes.json();
         const priceMap: Record<string, number> = {};
+        let detectedBasePrice = 150;
+        
         if (Array.isArray(allDates)) {
           for (const d of allDates) {
             if (d.villaId === villaId && typeof d.price === "number" && d.date) {
               const dateStr = new Date(d.date).toISOString().split("T")[0];
               priceMap[dateStr] = d.price;
+              // Use first price as base price approximation
+              if (detectedBasePrice === 150) detectedBasePrice = d.price;
             }
           }
         }
         setDatePrices(priceMap);
+        setBasePrice(detectedBasePrice);
         setLoading(false);
       } catch (error) {
         console.error("Error fetching availability:", error);
@@ -124,7 +130,7 @@ export function DatePicker({
       const isToday = dateStr === new Date().toISOString().split("T")[0];
       const isPast = new Date(dateStr) < new Date();
 
-      const price = datePrices[dateStr];
+      const price = datePrices[dateStr] ?? basePrice;
 
       days.push(
         <button
@@ -149,9 +155,9 @@ export function DatePicker({
           title={price ? `Price: $${price}` : undefined}
         >
           <span className="text-[11px] leading-none mb-1">{day}</span>
-          {!isUnavailable && (
+          {!isUnavailable && !isPast && (
             <span className="text-[11px] leading-none font-medium text-gray-700">
-              {typeof price === "number" ? `$${price}` : ""}
+              ${price}
             </span>
           )}
         </button>

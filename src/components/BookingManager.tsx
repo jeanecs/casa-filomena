@@ -83,6 +83,7 @@ export function BookingManager() {
   const [isEditingDate, setIsEditingDate] = useState(false);
   const [selectedDates, setSelectedDates] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const [basePrices, setBasePrices] = useState<Record<number, number>>({});
   
   // Search and filter states
   const [searchQuery, setSearchQuery] = useState("");
@@ -169,20 +170,29 @@ export function BookingManager() {
         setBookings(bookingsData);
         // Transform availability rows (flat BookingDate[]) into grouped per-villa structure
         const grouped: Record<number, VillaAvailability> = {};
+        const prices: Record<number, number> = {};
         if (Array.isArray(availabilityRaw)) {
           for (const row of availabilityRaw) {
             const vId: number = row.villaId ?? row.villa?.id;
             if (!vId) continue;
             if (!grouped[vId]) grouped[vId] = { villaId: vId, dates: [] };
             const dateStr = new Date(row.date).toISOString().split("T")[0];
+            const price = typeof row.price === "number" ? row.price : 150;
             grouped[vId].dates.push({
               date: dateStr,
-              price: typeof row.price === "number" ? row.price : 0,
+              price: price,
               available: row.available ?? true,
               isBlocked: row.isBlocked ?? false,
             });
+            // Track the most common price as base price (simple heuristic)
+            if (!prices[vId]) prices[vId] = price;
           }
         }
+        // Set base prices for each villa (defaulting to 150 if no data)
+        villasData.forEach((v: any) => {
+          if (!prices[v.id]) prices[v.id] = 150;
+        });
+        setBasePrices(prices);
         setAvailability(Object.values(grouped));
         setVillas(villasData);
         
@@ -208,20 +218,27 @@ export function BookingManager() {
       if (!availabilityRes.ok) throw new Error("Failed to refresh availability");
       const availabilityRaw = await availabilityRes.json();
       const grouped: Record<number, VillaAvailability> = {};
+      const prices: Record<number, number> = {};
       if (Array.isArray(availabilityRaw)) {
         for (const row of availabilityRaw) {
           const vId: number = row.villaId ?? row.villa?.id;
           if (!vId) continue;
           if (!grouped[vId]) grouped[vId] = { villaId: vId, dates: [] };
           const dateStr = new Date(row.date).toISOString().split("T")[0];
+          const price = typeof row.price === "number" ? row.price : 150;
           grouped[vId].dates.push({
             date: dateStr,
-            price: typeof row.price === "number" ? row.price : 0,
+            price: price,
             available: row.available ?? true,
             isBlocked: row.isBlocked ?? false,
           });
+          if (!prices[vId]) prices[vId] = price;
         }
       }
+      villas.forEach((v: any) => {
+        if (!prices[v.id]) prices[v.id] = 150;
+      });
+      setBasePrices(prices);
       setAvailability(Object.values(grouped));
     } catch (e) {
       console.error(e);
@@ -441,11 +458,11 @@ export function BookingManager() {
                           >
                             {day.booking.status}
                           </Badge>
-                        ) : day.dateInfo ? (
+                        ) : (
                           <span className="text-xs font-medium text-green-600">
-                            {formatPrice(day.dateInfo.price)}
+                            {formatPrice(day.dateInfo?.price ?? basePrices[selectedVilla] ?? 150)}
                           </span>
-                        ) : null}
+                        )}
                       </div>
                     )}
                   </div>
@@ -760,8 +777,10 @@ export function BookingManager() {
           )}
         </TabsContent>
 
-        <TabsContent value="pricing" forceMount>
-          <PricingManager villaId={selectedVilla} onPricingChange={refreshAvailability} />
+        <TabsContent value="pricing" forceMount className={`${selectedVilla ? '' : 'hidden'}`}>
+          <div data-state="active">
+            <PricingManager villaId={selectedVilla} onPricingChange={refreshAvailability} />
+          </div>
         </TabsContent>
       </Tabs>
     </div>
