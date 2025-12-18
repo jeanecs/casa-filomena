@@ -35,7 +35,7 @@ const formatPrice = (price: number) =>
     currency: "USD",
   }).format(price);
 
-export function PricingManager({ villaId }: { villaId: number }) {
+export function PricingManager({ villaId, onPricingChange }: { villaId: number; onPricingChange?: () => void }) {
   const [basePrice, setBasePrice] = useState<number>(150);
   const [pricingRules, setPricingRules] = useState<PricingRule[]>([]);
   const [customDates, setCustomDates] = useState<DatePrice[]>([]);
@@ -55,7 +55,21 @@ export function PricingManager({ villaId }: { villaId: number }) {
 
   useEffect(() => {
     fetchPricingData();
+    // Restore rules from localStorage so they persist across tab switches
+    try {
+      const key = `pricing_rules_villa_${villaId}`;
+      const saved = localStorage.getItem(key);
+      if (saved) setPricingRules(JSON.parse(saved));
+    } catch {}
   }, [villaId]);
+
+  // Persist rules to localStorage whenever they change
+  useEffect(() => {
+    try {
+      const key = `pricing_rules_villa_${villaId}`;
+      localStorage.setItem(key, JSON.stringify(pricingRules));
+    } catch {}
+  }, [pricingRules, villaId]);
 
   const fetchPricingData = async () => {
     try {
@@ -95,6 +109,7 @@ export function PricingManager({ villaId }: { villaId: number }) {
       if (!res.ok) throw new Error("Failed to update base price");
       toast.success("Base price updated successfully");
       fetchPricingData();
+      onPricingChange?.();
     } catch (error) {
       console.error(error);
       toast.error("Error updating base price");
@@ -118,6 +133,7 @@ export function PricingManager({ villaId }: { villaId: number }) {
 
     setPricingRules([...pricingRules, rule]);
     setNewRule({ name: "", startDate: "", endDate: "", price: 0 });
+    applySingleRule(rule);
     toast.success("Pricing rule added");
   };
 
@@ -127,12 +143,18 @@ export function PricingManager({ villaId }: { villaId: number }) {
   };
 
   const toggleRuleStatus = (id: string) => {
-    setPricingRules(
-      pricingRules.map((r) => (r.id === id ? { ...r, isActive: !r.isActive } : r))
-    );
+    setPricingRules((prev) => {
+      const updated = prev.map((r) => (r.id === id ? { ...r, isActive: !r.isActive } : r));
+      const changed = updated.find((r) => r.id === id);
+      if (changed && changed.isActive) {
+        // When enabling a rule, apply it immediately
+        applySingleRule(changed);
+      }
+      return updated;
+    });
   };
 
-  const addCustomDatePrice = () => {
+  const addCustomDatePrice = async () => {
     if (!customDate || customPrice <= 0) {
       toast.error("Please enter a valid date and price");
       return;
@@ -149,8 +171,22 @@ export function PricingManager({ villaId }: { villaId: number }) {
       toast.success("Custom date price added");
     }
 
-    setCustomDate("");
-    setCustomPrice(0);
+    try {
+      // Persist immediately
+      const res = await fetch(`/api/availability/${villaId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ updates: [{ date: customDate, price: customPrice }] }),
+      });
+      if (!res.ok) throw new Error("Failed to save custom date price");
+      onPricingChange?.();
+    } catch (e) {
+      console.error(e);
+      toast.error("Failed to save custom date to server");
+    } finally {
+      setCustomDate("");
+      setCustomPrice(0);
+    }
   };
 
   const removeCustomDate = (date: string) => {
@@ -187,6 +223,7 @@ export function PricingManager({ villaId }: { villaId: number }) {
       
       toast.success("Pricing applied successfully");
       fetchPricingData();
+      onPricingChange?.();
     } catch (error) {
       console.error(error);
       toast.error("Error applying pricing");
@@ -194,6 +231,31 @@ export function PricingManager({ villaId }: { villaId: number }) {
       setLoading(false);
     }
   };
+
+  // Helper: apply one rule to the server immediately
+  async function applySingleRule(rule: PricingRule) {
+    try {
+      const updates: Array<{ date: string; price: number }> = [];
+      const start = new Date(rule.startDate);
+      const end = new Date(rule.endDate);
+      for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+        const dateStr = d.toISOString().split("T")[0];
+        updates.push({ date: dateStr, price: rule.price });
+      }
+
+      const res = await fetch(`/api/availability/${villaId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ updates }),
+      });
+      if (!res.ok) throw new Error("Failed to apply rule");
+      fetchPricingData();
+      onPricingChange?.();
+    } catch (e) {
+      console.error(e);
+      toast.error("Failed to apply pricing rule to server");
+    }
+  }
 
   return (
     <div className="space-y-6">

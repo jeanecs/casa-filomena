@@ -163,11 +163,27 @@ export function BookingManager() {
         if (!villasRes.ok) throw new Error("Failed to fetch villas");
 
         const bookingsData = await bookingsRes.json();
-        const availabilityData = await availabilityRes.json();
+        const availabilityRaw = await availabilityRes.json();
         const villasData = await villasRes.json();
 
         setBookings(bookingsData);
-        setAvailability(availabilityData);
+        // Transform availability rows (flat BookingDate[]) into grouped per-villa structure
+        const grouped: Record<number, VillaAvailability> = {};
+        if (Array.isArray(availabilityRaw)) {
+          for (const row of availabilityRaw) {
+            const vId: number = row.villaId ?? row.villa?.id;
+            if (!vId) continue;
+            if (!grouped[vId]) grouped[vId] = { villaId: vId, dates: [] };
+            const dateStr = new Date(row.date).toISOString().split("T")[0];
+            grouped[vId].dates.push({
+              date: dateStr,
+              price: typeof row.price === "number" ? row.price : 0,
+              available: row.available ?? true,
+              isBlocked: row.isBlocked ?? false,
+            });
+          }
+        }
+        setAvailability(Object.values(grouped));
         setVillas(villasData);
         
         // Set first villa as selected if available
@@ -184,6 +200,33 @@ export function BookingManager() {
 
     fetchData();
   }, []);
+
+  // Allow children (PricingManager) to refresh availability immediately after changes
+  const refreshAvailability = async () => {
+    try {
+      const availabilityRes = await fetch("/api/availability");
+      if (!availabilityRes.ok) throw new Error("Failed to refresh availability");
+      const availabilityRaw = await availabilityRes.json();
+      const grouped: Record<number, VillaAvailability> = {};
+      if (Array.isArray(availabilityRaw)) {
+        for (const row of availabilityRaw) {
+          const vId: number = row.villaId ?? row.villa?.id;
+          if (!vId) continue;
+          if (!grouped[vId]) grouped[vId] = { villaId: vId, dates: [] };
+          const dateStr = new Date(row.date).toISOString().split("T")[0];
+          grouped[vId].dates.push({
+            date: dateStr,
+            price: typeof row.price === "number" ? row.price : 0,
+            available: row.available ?? true,
+            isBlocked: row.isBlocked ?? false,
+          });
+        }
+      }
+      setAvailability(Object.values(grouped));
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   const updateBookingStatus = async (
     bookingId: number,
@@ -717,8 +760,8 @@ export function BookingManager() {
           )}
         </TabsContent>
 
-        <TabsContent value="pricing">
-          <PricingManager villaId={selectedVilla} />
+        <TabsContent value="pricing" forceMount>
+          <PricingManager villaId={selectedVilla} onPricingChange={refreshAvailability} />
         </TabsContent>
       </Tabs>
     </div>

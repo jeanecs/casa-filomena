@@ -19,15 +19,33 @@ export function DatePicker({
   const [checkOut, setCheckOut] = useState("");
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [unavailableDates, setUnavailableDates] = useState<string[]>([]);
+  const [datePrices, setDatePrices] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
 
-  // Fetch unavailable dates
+  // Fetch unavailable dates and per-day prices
   useEffect(() => {
     async function fetchAvailability() {
       try {
-        const res = await fetch(`/api/availability/${villaId}`);
-        const data = await res.json();
-        setUnavailableDates(data.unavailableDates || []);
+        const [unavailRes, pricesRes] = await Promise.all([
+          fetch(`/api/availability/${villaId}`),
+          fetch(`/api/availability`),
+        ]);
+
+        const unavail = await unavailRes.json();
+        setUnavailableDates(unavail.unavailableDates || []);
+
+        // Build a map of date -> price for this villa
+        const allDates = await pricesRes.json();
+        const priceMap: Record<string, number> = {};
+        if (Array.isArray(allDates)) {
+          for (const d of allDates) {
+            if (d.villaId === villaId && typeof d.price === "number" && d.date) {
+              const dateStr = new Date(d.date).toISOString().split("T")[0];
+              priceMap[dateStr] = d.price;
+            }
+          }
+        }
+        setDatePrices(priceMap);
         setLoading(false);
       } catch (error) {
         console.error("Error fetching availability:", error);
@@ -106,12 +124,14 @@ export function DatePicker({
       const isToday = dateStr === new Date().toISOString().split("T")[0];
       const isPast = new Date(dateStr) < new Date();
 
+      const price = datePrices[dateStr];
+
       days.push(
         <button
           key={day}
           onClick={() => handleDateClick(day)}
           disabled={isUnavailable || isPast}
-          className={`h-10 text-sm flex items-center justify-center rounded transition-colors ${
+          className={`h-14 text-xs flex flex-col items-center justify-center rounded transition-colors px-1 ${
             isCheckIn
               ? "bg-yellow-800 text-white font-bold"
               : isCheckOut
@@ -126,8 +146,14 @@ export function DatePicker({
                         ? "border-2 border-yellow-800 text-gray-900"
                         : "hover:bg-yellow-50 text-gray-900"
           }`}
+          title={price ? `Price: $${price}` : undefined}
         >
-          {day}
+          <span className="text-[11px] leading-none mb-1">{day}</span>
+          {!isUnavailable && (
+            <span className="text-[11px] leading-none font-medium text-gray-700">
+              {typeof price === "number" ? `$${price}` : ""}
+            </span>
+          )}
         </button>
       );
     }
