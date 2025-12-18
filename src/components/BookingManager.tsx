@@ -35,6 +35,7 @@ import {
   Filter,
 } from "lucide-react";
 import { toast } from "sonner";
+import { PricingManager } from "./PricingManager";
 
 // Types
 type Booking = {
@@ -717,19 +718,7 @@ export function BookingManager() {
         </TabsContent>
 
         <TabsContent value="pricing">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <DollarSign className="w-5 h-5" />
-                <span>Pricing Management</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-gray-600">
-                Pricing bulk update tools go here
-              </p>
-            </CardContent>
-          </Card>
+          <PricingManager villaId={selectedVilla} />
         </TabsContent>
       </Tabs>
     </div>
