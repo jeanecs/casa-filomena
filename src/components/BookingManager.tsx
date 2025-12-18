@@ -31,6 +31,8 @@ import {
   Phone,
   ChevronLeft,
   ChevronRight,
+  Search,
+  Filter,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -80,11 +82,51 @@ export function BookingManager() {
   const [isEditingDate, setIsEditingDate] = useState(false);
   const [selectedDates, setSelectedDates] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  // Search and filter states
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"ALL" | Booking["status"]>("ALL");
+  const [dateFilter, setDateFilter] = useState<"ALL" | "UPCOMING" | "PAST">("ALL");
 
   const currentVillaAvailability = availability.find(
     (a) => a.villaId === selectedVilla
   );
-  const villaBookings = bookings.filter((b) => b.villaId === selectedVilla);
+  
+  // Filter bookings based on selected villa, search, status, and date
+  const filteredBookings = bookings
+    .filter((b) => b.villaId === selectedVilla)
+    .filter((b) => {
+      // Search filter
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        return (
+          b.guestName.toLowerCase().includes(query) ||
+          b.guestEmail.toLowerCase().includes(query) ||
+          b.guestPhone.includes(query)
+        );
+      }
+      return true;
+    })
+    .filter((b) => {
+      // Status filter
+      if (statusFilter === "ALL") return true;
+      return b.status === statusFilter;
+    })
+    .filter((b) => {
+      // Date filter
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const checkIn = new Date(b.checkIn);
+      
+      if (dateFilter === "UPCOMING") {
+        return checkIn >= today;
+      } else if (dateFilter === "PAST") {
+        return checkIn < today;
+      }
+      return true;
+    });
+
+  const villaBookings = filteredBookings;
 
   // 🔹 Fetch bookings + availability
   useEffect(() => {
@@ -353,6 +395,84 @@ export function BookingManager() {
         </TabsContent>
 
         <TabsContent value="bookings">
+          {/* Search and Filter Bar */}
+          <Card className="mb-4">
+            <CardContent className="p-4">
+              <div className="grid md:grid-cols-4 gap-4">
+                {/* Search Input */}
+                <div className="md:col-span-2">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <Input
+                      placeholder="Search by name, email, or phone..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+                </div>
+
+                {/* Status Filter */}
+                <div>
+                  <Select
+                    value={statusFilter}
+                    onValueChange={(value) => setStatusFilter(value as any)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Filter by status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="ALL">All Statuses</SelectItem>
+                      <SelectItem value="PENDING">Pending</SelectItem>
+                      <SelectItem value="CONFIRMED">Confirmed</SelectItem>
+                      <SelectItem value="CANCELLED">Cancelled</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Date Filter */}
+                <div>
+                  <Select
+                    value={dateFilter}
+                    onValueChange={(value) => setDateFilter(value as any)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Filter by date" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="ALL">All Dates</SelectItem>
+                      <SelectItem value="UPCOMING">Upcoming</SelectItem>
+                      <SelectItem value="PAST">Past</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Active Filters Summary */}
+              {(searchQuery || statusFilter !== "ALL" || dateFilter !== "ALL") && (
+                <div className="flex items-center gap-2 mt-3 pt-3 border-t">
+                  <Filter className="w-4 h-4 text-gray-500" />
+                  <span className="text-sm text-gray-600">
+                    Showing {villaBookings.length} of {bookings.filter(b => b.villaId === selectedVilla).length} bookings
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setSearchQuery("");
+                      setStatusFilter("ALL");
+                      setDateFilter("ALL");
+                    }}
+                    className="ml-auto text-xs"
+                  >
+                    Clear Filters
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Bookings List */}
           {villaBookings.map((booking) => (
             <Card key={booking.id} className="hover:shadow-md transition-shadow">
               <CardContent className="p-6">
@@ -453,11 +573,29 @@ export function BookingManager() {
               <CardContent className="text-center py-8">
                 <User className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  No bookings yet
+                  {searchQuery || statusFilter !== "ALL" || dateFilter !== "ALL" 
+                    ? "No bookings match your filters"
+                    : "No bookings yet"}
                 </h3>
                 <p className="text-gray-600">
-                  Bookings for this villa will appear here.
+                  {searchQuery || statusFilter !== "ALL" || dateFilter !== "ALL"
+                    ? "Try adjusting your search or filter criteria."
+                    : "Bookings for this villa will appear here."}
                 </p>
+                {(searchQuery || statusFilter !== "ALL" || dateFilter !== "ALL") && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setSearchQuery("");
+                      setStatusFilter("ALL");
+                      setDateFilter("ALL");
+                    }}
+                    className="mt-4"
+                  >
+                    Clear Filters
+                  </Button>
+                )}
               </CardContent>
             </Card>
           )}
