@@ -7,6 +7,7 @@ import { toast } from "sonner";
 
 export function VillaShowcase() {
   const [villas, setVillas] = useState<any[]>([]);
+  const [basePrices, setBasePrices] = useState<Record<number, number>>({});
   const [loading, setLoading] = useState(true);
   const searchParams = useSearchParams();
 
@@ -20,9 +21,42 @@ export function VillaShowcase() {
   useEffect(() => {
     async function loadVillas() {
       try {
-        const res = await fetch("/api/villas");
-        const data = await res.json();
-        setVillas(Array.isArray(data) ? data : []);
+        const [villasRes, availabilityRes] = await Promise.all([
+          fetch("/api/villas"),
+          fetch("/api/availability"),
+        ]);
+
+        const villasData = await villasRes.json();
+        const availability = await availabilityRes.json();
+
+        setVillas(Array.isArray(villasData) ? villasData : []);
+
+        // Compute a base price per villa from availability (most common price per villa)
+        const counts: Record<number, Record<number, number>> = {};
+        if (Array.isArray(availability)) {
+          for (const row of availability) {
+            const vId: number | undefined = row.villaId ?? row.villa?.id;
+            const price = Number(row.price);
+            if (!vId || !Number.isFinite(price)) continue;
+            counts[vId] = counts[vId] || {};
+            counts[vId][price] = (counts[vId][price] || 0) + 1;
+          }
+        }
+
+        const baseMap: Record<number, number> = {};
+        Object.entries(counts).forEach(([vIdStr, priceCounts]) => {
+          let bestPrice = 150;
+          let bestCount = 0;
+          Object.entries(priceCounts).forEach(([priceStr, count]) => {
+            if (count > bestCount) {
+              bestCount = count;
+              bestPrice = Number(priceStr);
+            }
+          });
+          baseMap[Number(vIdStr)] = bestPrice;
+        });
+
+        setBasePrices(baseMap);
       } catch (error) {
         console.error("Failed to load villas:", error);
         setVillas([]);
@@ -63,6 +97,7 @@ export function VillaShowcase() {
             <VillaCard
               key={villa.id}
               villa={villa}
+              basePrice={basePrices[villa.id]}
               onBookingSubmit={handleBookingSubmit}
               preselectedDates={
                 selectedVillaId === villa.id && checkIn && checkOut

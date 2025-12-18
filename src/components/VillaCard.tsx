@@ -13,10 +13,12 @@ interface VillaCardProps {
   onBookingSubmit?: (booking: Omit<Booking, 'id' | 'createdAt'>) => void;
   preselectedDates?: { checkIn: string; checkOut: string; guests: number; nights: number };
   autoOpenBooking?: boolean;
+  basePrice?: number;
 }
 
-export function VillaCard({ villa, onBookingSubmit, preselectedDates, autoOpenBooking }: VillaCardProps) {
+export function VillaCard({ villa, onBookingSubmit, preselectedDates, autoOpenBooking, basePrice }: VillaCardProps) {
   const [isBookingOpen, setIsBookingOpen] = useState(false);
+  const displayPrice = basePrice ?? 650;
 
   // Auto-open booking form if redirected from hero widget
   useEffect(() => {
@@ -54,7 +56,7 @@ export function VillaCard({ villa, onBookingSubmit, preselectedDates, autoOpenBo
           />
           <div className="absolute top-4 right-4">
             <Badge className="bg-white/90 text-gray-800">
-              From $650/night
+              From ${displayPrice}/night
             </Badge>
           </div>
         </div>
