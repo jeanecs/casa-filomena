@@ -16,6 +16,8 @@ export function BulletinManager() {
   const [loading, setLoading] = useState(true);
   const [editingPost, setEditingPost] = useState<Post | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [postToDelete, setPostToDelete] = useState<number | null>(null);
 
   const emptyPost: Omit<Post, 'id' | 'date'> = {
     title: '',
@@ -105,16 +107,31 @@ export function BulletinManager() {
   };
 
   const handleDelete = async (postId: number) => {
+    setPostToDelete(postId);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!postToDelete) return;
+
     try {
-      const res = await fetch(`/api/posts/${postId}`, { method: "DELETE" });
+      const res = await fetch(`/api/posts/${postToDelete}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Failed to delete post");
 
-      setPosts(posts.filter(p => p.id !== postId));
+      setPosts(posts.filter(p => p.id !== postToDelete));
       toast.success("Post deleted successfully");
     } catch (error) {
       console.error(error);
       toast.error("Error deleting post");
+    } finally {
+      setDeleteDialogOpen(false);
+      setPostToDelete(null);
     }
+  };
+
+  const cancelDelete = () => {
+    setDeleteDialogOpen(false);
+    setPostToDelete(null);
   };
 
   const handleCancel = () => {
@@ -192,6 +209,25 @@ export function BulletinManager() {
                 <span>{editingPost ? 'Update' : 'Create'} Post</span>
               </Button>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Deletion</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this post? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end space-x-2 mt-4">
+            <Button variant="outline" onClick={cancelDelete}>Cancel</Button>
+            <Button variant="destructive" onClick={confirmDelete}>
+              <Trash2 className="w-4 h-4 mr-2" />
+              Delete
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
