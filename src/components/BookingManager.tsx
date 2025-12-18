@@ -87,6 +87,10 @@ export function BookingManager() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"ALL" | Booking["status"]>("ALL");
   const [dateFilter, setDateFilter] = useState<"ALL" | "UPCOMING" | "PAST">("ALL");
+  
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(5);
 
   const currentVillaAvailability = availability.find(
     (a) => a.villaId === selectedVilla
@@ -126,7 +130,20 @@ export function BookingManager() {
       return true;
     });
 
-  const villaBookings = filteredBookings;
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, statusFilter, dateFilter, selectedVilla]);
+
+  // Pagination calculation
+  const totalPages = Math.ceil(filteredBookings.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const villaBookings = filteredBookings.slice(startIndex, endIndex);
+
+  const goToPage = (page: number) => {
+    setCurrentPage(Math.max(1, Math.min(page, totalPages)));
+  };
 
   // 🔹 Fetch bookings + availability
   useEffect(() => {
@@ -394,7 +411,7 @@ export function BookingManager() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="bookings">
+        <TabsContent value="bookings" className="relative">
           {/* Search and Filter Bar */}
           <Card className="mb-4">
             <CardContent className="p-4">
@@ -453,7 +470,7 @@ export function BookingManager() {
                 <div className="flex items-center gap-2 mt-3 pt-3 border-t">
                   <Filter className="w-4 h-4 text-gray-500" />
                   <span className="text-sm text-gray-600">
-                    Showing {villaBookings.length} of {bookings.filter(b => b.villaId === selectedVilla).length} bookings
+                    Showing {startIndex + 1}-{Math.min(endIndex, filteredBookings.length)} of {filteredBookings.length} filtered bookings ({bookings.filter(b => b.villaId === selectedVilla).length} total)
                   </span>
                   <Button
                     variant="ghost"
@@ -472,8 +489,9 @@ export function BookingManager() {
             </CardContent>
           </Card>
 
-          {/* Bookings List */}
-          {villaBookings.map((booking) => (
+          {/* Scrollable Bookings Container */}
+          <div className="max-h-[600px] overflow-y-auto space-y-4 mb-4 pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+            {villaBookings.map((booking) => (
             <Card key={booking.id} className="hover:shadow-md transition-shadow">
               <CardContent className="p-6">
                 <div className="flex justify-between items-start mb-4">
@@ -567,6 +585,103 @@ export function BookingManager() {
               </CardContent>
             </Card>
           ))}
+
+          {villaBookings.length === 0 && (
+            <Card>
+              <CardContent className="text-center py-8">
+                <User className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  {searchQuery || statusFilter !== "ALL" || dateFilter !== "ALL" 
+                    ? "No bookings match your filters"
+                    : "No bookings yet"}
+                </h3>
+                <p className="text-gray-600">
+                  {searchQuery || statusFilter !== "ALL" || dateFilter !== "ALL"
+                    ? "Try adjusting your search or filter criteria."
+                    : "Bookings for this villa will appear here."}
+                </p>
+                {(searchQuery || statusFilter !== "ALL" || dateFilter !== "ALL") && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setSearchQuery("");
+                      setStatusFilter("ALL");
+                      setDateFilter("ALL");
+                    }}
+                    className="mt-4"
+                  >
+                    Clear Filters
+                  </Button>
+                )}
+              </CardContent>
+            </Card>
+          )}
+          </div>
+
+          {/* Sticky Pagination Controls */}
+          {filteredBookings.length > itemsPerPage && (
+            <div className="sticky bottom-0 bg-white pt-2 z-10">
+              <Card className="shadow-lg">
+                <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div className="text-sm text-gray-600">
+                    Page {currentPage} of {totalPages} ({filteredBookings.length} bookings)
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => goToPage(currentPage - 1)}
+                      disabled={currentPage === 1}
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                      Previous
+                    </Button>
+                    
+                    <div className="flex space-x-1">
+                      {Array.from({ length: totalPages }, (_, i) => i + 1)
+                        .filter(page => {
+                          // Show first, last, current, and pages around current
+                          return (
+                            page === 1 ||
+                            page === totalPages ||
+                            Math.abs(page - currentPage) <= 1
+                          );
+                        })
+                        .map((page, idx, arr) => (
+                          <div key={page} className="flex items-center">
+                            {idx > 0 && arr[idx - 1] !== page - 1 && (
+                              <span className="px-2 text-gray-400">...</span>
+                            )}
+                            <Button
+                              variant={currentPage === page ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => goToPage(page)}
+                              className="min-w-[40px]"
+                            >
+                              {page}
+                            </Button>
+                          </div>
+                        ))}
+                    </div>
+                    
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => goToPage(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                    >
+                      Next
+                      <ChevronRight className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+          )}
 
           {villaBookings.length === 0 && (
             <Card>
