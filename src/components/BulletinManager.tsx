@@ -6,7 +6,7 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 import { Badge } from './ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from './ui/dialog';
 import { Plus, Edit, Trash2, Save, Calendar, User, FileText } from 'lucide-react';
 import { toast } from 'sonner';
 import { Post, getPriorityColor } from '../../prisma/data/bulletin';
@@ -141,6 +141,9 @@ export function BulletinManager() {
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>{editingPost ? 'Edit Post' : 'Create New Post'}</DialogTitle>
+            <DialogDescription>
+              {editingPost ? 'Update the bulletin board post details below.' : 'Fill in the details to create a new bulletin board post.'}
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div>

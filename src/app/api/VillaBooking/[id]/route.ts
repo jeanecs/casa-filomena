@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma"; // Changed from default import
 import { sendBookingEmail } from "@/lib/mailer";
 import { bookingEmailTemplate } from "@/lib/emailTemplates";
 
+export const dynamic = "force-dynamic";
+
 export async function PATCH(
   req: Request,
   { params }: { params: { id: string } }

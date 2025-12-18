@@ -28,13 +28,14 @@ export function HeroBookingWidget() {
       try {
         const res = await fetch("/api/villas");
         const data = await res.json();
-        setVillas(data);
-        if (data.length > 0) {
+        setVillas(Array.isArray(data) ? data : []);
+        if (Array.isArray(data) && data.length > 0) {
           setSelectedVilla(data[0]);
         }
-        setLoading(false);
       } catch (error) {
         console.error("Error fetching villas:", error);
+        setVillas([]);
+      } finally {
         setLoading(false);
       }
     }

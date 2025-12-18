@@ -19,10 +19,16 @@ export function VillaShowcase() {
 
   useEffect(() => {
     async function loadVillas() {
-      const res = await fetch("/api/villas");
-      const data = await res.json();
-      setVillas(data);
-      setLoading(false);
+      try {
+        const res = await fetch("/api/villas");
+        const data = await res.json();
+        setVillas(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error("Failed to load villas:", error);
+        setVillas([]);
+      } finally {
+        setLoading(false);
+      }
     }
     loadVillas();
   }, []);

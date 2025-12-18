@@ -1,7 +1,30 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+
+export const dynamic = "force-dynamic";
 
 const prisma = new PrismaClient();
+
+// Check if user is authenticated as admin via session or legacy header token
+async function isAdmin(req: Request) {
+  const session = await getServerSession(authOptions);
+  const adminEmail = process.env.ADMIN_USERNAME;
+
+  // Accept session authenticated as admin by email/id/role/name
+  if (
+    (adminEmail && session?.user?.email === adminEmail) ||
+    (session as any)?.user?.id === 'admin' ||
+    session?.user?.name === 'Admin' ||
+    (session as any)?.user?.role === 'admin'
+  ) {
+    return true;
+  }
+
+  const authHeader = req.headers.get('x-admin-token');
+  return authHeader === process.env.ADMIN_TOKEN;
+}
 
 // GET /api/post/[id] → fetch single post
 export async function GET(
@@ -32,6 +55,10 @@ export async function PUT(
   req: Request,
   { params }: { params: { id: string } }
 ) {
+  if (!(await isAdmin(req))) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+  }
+  
   try {
     const data = await req.json();
 
@@ -60,6 +87,10 @@ export async function DELETE(
   req: Request,
   { params }: { params: { id: string } }
 ) {
+  if (!(await isAdmin(req))) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+  }
+  
   try {
     await prisma.post.delete({
       where: { id: Number(params.id) },

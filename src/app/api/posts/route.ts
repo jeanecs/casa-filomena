@@ -1,13 +1,29 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+
+export const dynamic = "force-dynamic";
 
 const prisma = new PrismaClient();
 
-// Fake admin check for now (replace with NextAuth/JWT/etc.)
+// Check if user is authenticated as admin via session or legacy header token
 async function isAdmin(req: Request) {
-  // Example: check a header, cookie, or session
-  const authHeader = req.headers.get("x-admin-token");
-  return authHeader === process.env.ADMIN_TOKEN; // simple demo
+  const session = await getServerSession(authOptions);
+  const adminEmail = process.env.ADMIN_USERNAME;
+
+  // Accept session authenticated as admin by email/id/role/name
+  if (
+    (adminEmail && session?.user?.email === adminEmail) ||
+    (session?.user as any)?.id === 'admin' ||
+    session?.user?.name === 'Admin' ||
+    (session as any)?.user?.role === 'admin'
+  ) {
+    return true;
+  }
+
+  const authHeader = req.headers.get('x-admin-token');
+  return authHeader === process.env.ADMIN_TOKEN;
 }
 
 // CREATE a new post (admin only)

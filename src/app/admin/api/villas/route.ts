@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import {prisma} from "@/lib/prisma"; // Make sure you have lib/prisma.ts
 
+export const dynamic = "force-dynamic";
+
 // GET all villas
 export async function GET() {
   try {

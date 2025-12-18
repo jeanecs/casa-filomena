@@ -4,6 +4,8 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
 
+export const dynamic = "force-dynamic";
+
 const prisma = new PrismaClient();
 
 export const authOptions = {

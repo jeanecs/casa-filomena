@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma'
 import { sendBookingEmail } from '@/lib/mailer'
 import { bookingEmailTemplate } from '@/lib/emailTemplates'
 
+export const dynamic = "force-dynamic";
+
 export async function POST(req: Request) {
   try {
     const data = await req.json()

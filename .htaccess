@@ -1,0 +1,2 @@
+RewriteEngine on
+RewriteRule (.*) http://127.0.0.1:20146%{REQUEST_URI} [P,L]
