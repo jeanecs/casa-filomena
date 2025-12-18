@@ -53,16 +53,24 @@ export function PricingManager({ villaId, onPricingChange }: { villaId: number; 
   const [customDate, setCustomDate] = useState("");
   const [customPrice, setCustomPrice] = useState<number>(0);
 
-  // Restore rules from localStorage on mount and when villa changes
+  // Restore rules and base price from localStorage on mount and when villa changes
   useEffect(() => {
     try {
-      const key = `pricing_rules_villa_${villaId}`;
-      const saved = localStorage.getItem(key);
-      if (saved) {
-        const parsed = JSON.parse(saved);
+      const rulesKey = `pricing_rules_villa_${villaId}`;
+      const basePriceKey = `base_price_villa_${villaId}`;
+      
+      const savedRules = localStorage.getItem(rulesKey);
+      if (savedRules) {
+        const parsed = JSON.parse(savedRules);
         if (Array.isArray(parsed) && parsed.length > 0) {
           setPricingRules(parsed);
         }
+      }
+      
+      const savedBasePrice = localStorage.getItem(basePriceKey);
+      if (savedBasePrice) {
+        const price = Number(savedBasePrice);
+        if (price > 0) setBasePrice(price);
       }
     } catch {}
     fetchPricingData();
@@ -78,6 +86,16 @@ export function PricingManager({ villaId, onPricingChange }: { villaId: number; 
     }
   }, [pricingRules, villaId]);
 
+  // Persist base price to localStorage whenever it changes
+  useEffect(() => {
+    if (basePrice > 0) {
+      try {
+        const key = `base_price_villa_${villaId}`;
+        localStorage.setItem(key, String(basePrice));
+      } catch {}
+    }
+  }, [basePrice, villaId]);
+
   const fetchPricingData = async () => {
     try {
       setLoading(true);
@@ -86,13 +104,32 @@ export function PricingManager({ villaId, onPricingChange }: { villaId: number; 
       
       const data = await res.json();
       // Process the data to extract base price and custom pricing
-      // This is a simplified example - adjust based on your actual API response
-      if (data.dates && data.dates.length > 0) {
-        setBasePrice(data.dates[0].price || 150);
+      if (data.pricingData && data.pricingData.length > 0) {
+        // Get the most common price as base price (simple heuristic)
+        const priceCounts = new Map<number, number>();
+        data.pricingData.forEach((d: any) => {
+          const count = priceCounts.get(d.price) || 0;
+          priceCounts.set(d.price, count + 1);
+        });
         
-        // Extract unique prices and dates
-        const customPricing = data.dates
-          .filter((d: any) => d.price !== data.dates[0].price)
+        // Find most frequent price
+        let mostFrequentPrice = 150;
+        let maxCount = 0;
+        priceCounts.forEach((count, price) => {
+          if (count > maxCount) {
+            maxCount = count;
+            mostFrequentPrice = price;
+          }
+        });
+        
+        // Only update basePrice if we don't have one in localStorage
+        const savedBasePrice = localStorage.getItem(`base_price_villa_${villaId}`);
+        if (!savedBasePrice) {
+          setBasePrice(mostFrequentPrice);
+        }
+        
+        // Extract custom date pricing
+        const customPricing = data.pricingData
           .map((d: any) => ({ date: d.date, price: d.price }));
         
         setCustomDates(customPricing);
