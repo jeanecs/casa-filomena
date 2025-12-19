@@ -2,13 +2,14 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { SessionProvider } from "next-auth/react";
 import { Providers } from "./providers";
-import { Lora } from 'next/font/google'
+// Disabled Google Font to avoid build timeouts
+// import { Lora } from 'next/font/google'
 
-const fontFace = Lora({
-  subsets: ['latin'],
-  weight: '400',
-  variable: '--font-lora',
-})
+// const fontFace = Lora({
+//   subsets: ['latin'],
+//   weight: '400',
+//   variable: '--font-lora',
+// })
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -23,7 +24,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${fontFace.variable} antialiased`}
+        className="antialiased"
       >
         <Providers>{children}</Providers>
       </body>
