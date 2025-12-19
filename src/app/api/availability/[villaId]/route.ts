@@ -5,10 +5,11 @@ export const dynamic = "force-dynamic";
 
 export async function GET(
   req: Request,
-  { params }: { params: { villaId: string } }
+  { params }: { params: Promise<{ villaId: string }> }
 ) {
   try {
-    const villaId = parseInt(params.villaId)
+    const { villaId: villaIdStr } = await params;
+    const villaId = parseInt(villaIdStr)
 
     // Get all confirmed bookings for this villa
     const confirmedBookings = await prisma.villaBooking.findMany({
@@ -75,10 +76,11 @@ export async function GET(
 // Apply pricing updates for specific dates
 export async function POST(
   req: Request,
-  { params }: { params: { villaId: string } }
+  { params }: { params: Promise<{ villaId: string }> }
 ) {
   try {
-    const villaId = parseInt(params.villaId)
+    const { villaId: villaIdStr } = await params;
+    const villaId = parseInt(villaIdStr)
     const body = await req.json()
     const updates: Array<{ date: string; price: number }> = body?.updates || []
 
@@ -132,10 +134,11 @@ export async function POST(
 // Update base price across existing dates (simple strategy: future, non-blocked)
 export async function PATCH(
   req: Request,
-  { params }: { params: { villaId: string } }
+  { params }: { params: Promise<{ villaId: string }> }
 ) {
   try {
-    const villaId = parseInt(params.villaId)
+    const { villaId: villaIdStr } = await params;
+    const villaId = parseInt(villaIdStr)
     const body = await req.json()
     const basePrice = Number(body?.basePrice)
     const scope: "ALL" | "FUTURE" = body?.scope === "ALL" ? "ALL" : "FUTURE"
