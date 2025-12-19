@@ -75,8 +75,8 @@ export function VillaCard({ villa, onBookingSubmit, preselectedDates, autoOpenBo
           />
           {images.length > 1 && (
             <div className="absolute inset-y-0 left-0 right-0 flex justify-between items-center p-2">
-              <Button variant="outline" size="sm" onClick={() => setActiveIdx((i) => Math.max(0, i - 1))} disabled={activeIdx === 0}>Prev</Button>
-              <Button variant="outline" size="sm" onClick={() => setActiveIdx((i) => Math.min(images.length - 1, i + 1))} disabled={activeIdx === images.length - 1}>Next</Button>
+                <Button variant="ghost" size="sm" onClick={() => setActiveIdx((i) => Math.max(0, i - 1))} disabled={activeIdx === 0} className="text-white hover:text-white hover:font-bold hover:bg-transparent">&lt;</Button>
+                <Button variant="ghost" size="sm" onClick={() => setActiveIdx((i) => Math.min(images.length - 1, i + 1))} disabled={activeIdx === images.length - 1} className="text-white hover:text-white hover:font-bold hover:bg-transparent">&gt;</Button>
             </div>
           )}
           <div className="absolute top-4 right-4">
@@ -85,7 +85,7 @@ export function VillaCard({ villa, onBookingSubmit, preselectedDates, autoOpenBo
             </Badge>
           </div>
           <div className="absolute bottom-3 right-4">
-            <Button variant="outline" size="sm" onClick={() => setGalleryOpen(true)}>View Gallery</Button>
+            <Button variant="outline" size="sm" onClick={() => setGalleryOpen(true)} className="rounded-none">View Gallery</Button>
           </div>
         </div>
         
