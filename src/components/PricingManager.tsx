@@ -71,6 +71,10 @@ export function PricingManager({ villaId, onPricingChange }: { villaId: number; 
       if (savedBasePrice) {
         const price = Number(savedBasePrice);
         if (price > 0) setBasePrice(price);
+        else setBasePrice(150);
+      } else {
+        // Reset to default before fetching so we don't leak prior villa's base price
+        setBasePrice(150);
       }
     } catch {}
     fetchPricingData();
@@ -104,28 +108,19 @@ export function PricingManager({ villaId, onPricingChange }: { villaId: number; 
       
       const data = await res.json();
       // Process the data to extract base price and custom pricing
+      const savedBasePriceStr = localStorage.getItem(`base_price_villa_${villaId}`);
+      const savedBasePriceNum = savedBasePriceStr ? Number(savedBasePriceStr) : null;
+      if (Number.isFinite(savedBasePriceNum) && savedBasePriceNum! > 0) {
+        setBasePrice(savedBasePriceNum!);
+      }
+
       if (data.pricingData && data.pricingData.length > 0) {
-        // Get the most common price as base price (simple heuristic)
-        const priceCounts = new Map<number, number>();
-        data.pricingData.forEach((d: any) => {
-          const count = priceCounts.get(d.price) || 0;
-          priceCounts.set(d.price, count + 1);
-        });
-        
-        // Find most frequent price
-        let mostFrequentPrice = 150;
-        let maxCount = 0;
-        priceCounts.forEach((count, price) => {
-          if (count > maxCount) {
-            maxCount = count;
-            mostFrequentPrice = price;
+        // If no saved base price, use the first pricingData price as a stable default
+        if (!savedBasePriceStr) {
+          const firstPrice = data.pricingData[0]?.price;
+          if (typeof firstPrice === "number" && firstPrice > 0) {
+            setBasePrice(firstPrice);
           }
-        });
-        
-        // Only update basePrice if we don't have one in localStorage
-        const savedBasePrice = localStorage.getItem(`base_price_villa_${villaId}`);
-        if (!savedBasePrice) {
-          setBasePrice(mostFrequentPrice);
         }
         
         // Extract custom date pricing
@@ -152,6 +147,10 @@ export function PricingManager({ villaId, onPricingChange }: { villaId: number; 
 
       if (!res.ok) throw new Error("Failed to update base price");
       toast.success("Base price updated successfully");
+      // Persist immediately to localStorage so reloads keep the value
+      try {
+        localStorage.setItem(`base_price_villa_${villaId}`, String(basePrice));
+      } catch {}
       fetchPricingData();
       onPricingChange?.();
     } catch (error) {
