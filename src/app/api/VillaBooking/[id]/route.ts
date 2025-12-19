@@ -8,13 +8,14 @@ export const dynamic = "force-dynamic";
 
 export async function PATCH(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const { status } = await req.json();
 
     const booking = await prisma.villaBooking.update({
-      where: { id: parseInt(params.id) },
+      where: { id: parseInt(id) },
       data: { status },
       include: { villa: true },
     });
