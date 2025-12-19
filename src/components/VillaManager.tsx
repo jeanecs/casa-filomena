@@ -30,6 +30,7 @@ export function VillaManager() {
   };
 
   const [formData, setFormData] = useState<Omit<Villa, "id">>(emptyVilla);
+  const [uploading, setUploading] = useState(false);
 
   // Fetch villas from DB on load
   useEffect(() => {
@@ -160,12 +161,47 @@ export function VillaManager() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2">Image URL</label>
-                  <Input
-                    value={formData.image}
-                    onChange={(e) => setFormData({...formData, image: e.target.value})}
-                    placeholder="Enter image URL"
-                  />
+                  <label className="block text-sm font-medium mb-2">Image</label>
+                  <div className="flex items-center gap-3">
+                    <Input
+                      value={formData.image}
+                      onChange={(e) => setFormData({...formData, image: e.target.value})}
+                      placeholder="Enter image URL or upload"
+                    />
+                    <label className="px-3 py-2 border rounded cursor-pointer bg-gray-50 hover:bg-gray-100 text-sm">
+                      {uploading ? "Uploading..." : "Upload"}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          try {
+                            setUploading(true);
+                            const fd = new FormData();
+                            fd.append("file", file);
+                            const res = await fetch("/admin/api/upload", { method: "POST", body: fd });
+                            if (!res.ok) throw new Error("Upload failed");
+                            const data = await res.json();
+                            if (data?.url) {
+                              setFormData({ ...formData, image: data.url });
+                              toast.success("Image uploaded");
+                            } else {
+                              toast.error("Invalid upload response");
+                            }
+                          } catch (err) {
+                            console.error(err);
+                            toast.error("Failed to upload image");
+                          } finally {
+                            setUploading(false);
+                            // reset input so same file can be reselected
+                            e.currentTarget.value = "";
+                          }
+                        }}
+                      />
+                    </label>
+                  </div>
                 </div>
               </div>
 
