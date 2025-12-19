@@ -31,6 +31,7 @@ export function VillaManager() {
 
   const [formData, setFormData] = useState<Omit<Villa, "id">>(emptyVilla);
   const [uploading, setUploading] = useState(false);
+  const [gallery, setGallery] = useState<string[]>([]);
 
   // Fetch villas from DB on load
   useEffect(() => {
@@ -39,6 +40,18 @@ export function VillaManager() {
       .then(setVillas)
       .catch(() => toast.error("Failed to load villas"));
   }, []);
+
+  // Load gallery when editing a villa
+  useEffect(() => {
+    if (editingVilla) {
+      fetch(`/admin/api/gallery/${editingVilla.id}`)
+        .then((res) => res.json())
+        .then((d) => setGallery(Array.isArray(d.images) ? d.images : []))
+        .catch(() => setGallery([]));
+    } else {
+      setGallery([]);
+    }
+  }, [editingVilla]);
 
   const handleEdit = (villa: Villa) => {
     setEditingVilla(villa);
@@ -267,6 +280,54 @@ export function VillaManager() {
                       alt="Villa preview"
                       className="w-full h-32 object-cover rounded-lg"
                     />
+                  </div>
+                )}
+
+                {/* Gallery Management */}
+                {editingVilla && (
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium">Gallery</label>
+                    <div className="flex flex-wrap gap-2">
+                      {gallery.map((g) => (
+                        <div key={g} className="relative w-24 h-24 rounded overflow-hidden border">
+                          <ImageWithFallback src={g} alt="thumb" className="w-full h-full object-cover" />
+                          <button
+                            className="absolute top-1 right-1 bg-white/90 text-xs px-1 rounded"
+                            onClick={async () => {
+                              try {
+                                const filename = g.split("/").pop();
+                                await fetch(`/admin/api/gallery/${editingVilla.id}`, {
+                                  method: "DELETE",
+                                  headers: { "Content-Type": "application/json" },
+                                  body: JSON.stringify({ filename }),
+                                });
+                                setGallery((prev) => prev.filter((i) => i !== g));
+                              } catch {}
+                            }}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      ))}
+                      <label className="w-24 h-24 flex items-center justify-center border rounded cursor-pointer bg-gray-50 hover:bg-gray-100 text-xs">
+                        Add
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (!file || !editingVilla) return;
+                            const fd = new FormData();
+                            fd.append("file", file);
+                            const res = await fetch(`/admin/api/gallery/${editingVilla.id}`, { method: "POST", body: fd });
+                            const data = await res.json();
+                            if (data?.url) setGallery((prev) => [...prev, data.url]);
+                            e.currentTarget.value = "";
+                          }}
+                        />
+                      </label>
+                    </div>
                   </div>
                 )}
               </div>

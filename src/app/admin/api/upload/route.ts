@@ -18,12 +18,13 @@ export async function POST(req: Request) {
     const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
     const safeExt = ["jpg", "jpeg", "png", "webp"].includes(ext) ? ext : "jpg";
     const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.${safeExt}`;
-    const uploadDir = path.join(process.cwd(), "public", "images", "villas");
+    const villaId = (form.get("villaId") as string) || "common";
+    const uploadDir = path.join(process.cwd(), "public", "images", "villas", villaId);
     await mkdir(uploadDir, { recursive: true });
     const filePath = path.join(uploadDir, filename);
     await writeFile(filePath, buffer);
 
-    const url = `/images/villas/${filename}`;
+    const url = `/images/villas/${villaId}/${filename}`;
     return NextResponse.json({ url });
   } catch (err) {
     console.error("Upload failed", err);

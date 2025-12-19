@@ -7,6 +7,7 @@ import { BookingForm } from '../components/BookingForm';
 import { Bed, Bath, Users, Wifi, Car, Calendar } from 'lucide-react';
 import { Villa } from '../../prisma/data/villas';
 import { Booking } from '../../prisma/data/bookings';
+import { GalleryDialog } from './GalleryDialog';
 
 interface VillaCardProps {
   villa: Villa;
@@ -18,6 +19,9 @@ interface VillaCardProps {
 
 export function VillaCard({ villa, onBookingSubmit, preselectedDates, autoOpenBooking, basePrice }: VillaCardProps) {
   const [isBookingOpen, setIsBookingOpen] = useState(false);
+  const [galleryOpen, setGalleryOpen] = useState(false);
+  const [images, setImages] = useState<string[]>([]);
+  const [activeIdx, setActiveIdx] = useState(0);
   const displayPrice = basePrice ?? 650;
 
   // Auto-open booking form if redirected from hero widget
@@ -26,6 +30,21 @@ export function VillaCard({ villa, onBookingSubmit, preselectedDates, autoOpenBo
       setIsBookingOpen(true);
     }
   }, [autoOpenBooking]);
+
+  // Load gallery images for carousel
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch(`/admin/api/gallery/${villa.id}`);
+        const data = await res.json();
+        const list: string[] = Array.isArray(data.images) ? data.images : [];
+        setImages(list.length ? list : [villa.image]);
+        setActiveIdx(0);
+      } catch {
+        setImages([villa.image]);
+      }
+    })();
+  }, [villa.id, villa.image]);
 
   const getAmenityIcon = (amenity: string) => {
     switch (amenity.toLowerCase()) {
@@ -50,14 +69,23 @@ export function VillaCard({ villa, onBookingSubmit, preselectedDates, autoOpenBo
       <Card className="overflow-hidden hover:shadow-lg transition-shadow rounded-[1px]">
         <div className="relative h-64">
           <ImageWithFallback
-            src={villa.image}
+            src={images[activeIdx]}
             alt={villa.name}
             className="w-full h-full object-cover"
           />
+          {images.length > 1 && (
+            <div className="absolute inset-y-0 left-0 right-0 flex justify-between items-center p-2">
+              <Button variant="outline" size="sm" onClick={() => setActiveIdx((i) => Math.max(0, i - 1))} disabled={activeIdx === 0}>Prev</Button>
+              <Button variant="outline" size="sm" onClick={() => setActiveIdx((i) => Math.min(images.length - 1, i + 1))} disabled={activeIdx === images.length - 1}>Next</Button>
+            </div>
+          )}
           <div className="absolute top-4 right-4">
             <Badge className="bg-white/90 text-gray-800">
               From ${displayPrice}/night
             </Badge>
+          </div>
+          <div className="absolute bottom-3 right-4">
+            <Button variant="outline" size="sm" onClick={() => setGalleryOpen(true)}>View Gallery</Button>
           </div>
         </div>
         
@@ -113,6 +141,8 @@ export function VillaCard({ villa, onBookingSubmit, preselectedDates, autoOpenBo
         onBookingSubmit={handleBookingSubmit}
         preselectedDates={preselectedDates}
       />
+
+      <GalleryDialog villaId={villa.id} open={galleryOpen} onClose={() => setGalleryOpen(false)} />
     </>
   );
 }
