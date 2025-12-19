@@ -3,13 +3,13 @@ import "./globals.css";
 import { SessionProvider } from "next-auth/react";
 import { Providers } from "./providers";
 // Disabled Google Font to avoid build timeouts
-// import { Lora } from 'next/font/google'
+import { Lora } from 'next/font/google'
 
-// const fontFace = Lora({
-//   subsets: ['latin'],
-//   weight: '400',
-//   variable: '--font-lora',
-// })
+ const fontFace = Lora({
+   subsets: ['latin'],
+  weight: '400',
+  variable: '--font-lora',
+ })
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -23,9 +23,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className="antialiased"
-      >
+      <body className={`${fontFace.variable} antialiased`}>
         <Providers>{children}</Providers>
       </body>
     </html>
