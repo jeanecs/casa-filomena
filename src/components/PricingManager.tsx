@@ -403,7 +403,7 @@ export function PricingManager({ villaId, onPricingChange }: { villaId: number; 
                   </Button>
                   <Button
                     size="sm"
-                    variant="destructive"
+                    className="bg-red-100 text-red-700 hover:bg-red-200 border border-red-200"
                     onClick={() => removePricingRule(rule.id)}
                   >
                     <Trash2 className="w-4 h-4" />
@@ -465,7 +465,7 @@ export function PricingManager({ villaId, onPricingChange }: { villaId: number; 
                   </div>
                   <Button
                     size="sm"
-                    variant="destructive"
+                    className="bg-red-100 text-red-700 hover:bg-red-200 border border-red-200"
                     onClick={() => removeCustomDate(item.date)}
                   >
                     <Trash2 className="w-4 h-4" />

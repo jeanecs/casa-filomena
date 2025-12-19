@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+// Dialog for cancel confirmation
+// State for cancel confirmation dialog
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -74,6 +76,8 @@ const formatPrice = (price: number) =>
   }).format(price);
 
 export function BookingManager() {
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+const [pendingCancelId, setPendingCancelId] = useState<number | null>(null);
   const [availability, setAvailability] = useState<VillaAvailability[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [villas, setVillas] = useState<any[]>([]);
@@ -622,10 +626,11 @@ export function BookingManager() {
                       </Button>
                       <Button
                         size="sm"
-                        variant="destructive"
-                        onClick={() =>
-                          updateBookingStatus(booking.id, "CANCELLED")
-                        }
+                        className="bg-red-100 text-red-700 hover:bg-red-200 border border-red-200"
+                        onClick={() => {
+                          setPendingCancelId(booking.id);
+                          setCancelDialogOpen(true);
+                        }}
                       >
                         Cancel
                       </Button>
@@ -634,14 +639,41 @@ export function BookingManager() {
                   {booking.status === "CONFIRMED" && (
                     <Button
                       size="sm"
-                      variant="destructive"
-                      onClick={() =>
-                        updateBookingStatus(booking.id, "CANCELLED")
-                      }
+                      className="bg-red-100 text-red-700 hover:bg-red-200 border border-red-200"
+                      onClick={() => {
+                        setPendingCancelId(booking.id);
+                        setCancelDialogOpen(true);
+                      }}
                     >
                       Cancel Booking
                     </Button>
                   )}
+                  {/* Cancel Confirmation Dialog */}
+                  <Dialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Confirm Cancellation</DialogTitle>
+                      </DialogHeader>
+                      <div>Are you sure you want to cancel this booking? This action cannot be undone.</div>
+                      <div className="flex justify-end gap-2 mt-4">
+                        <Button variant="outline" onClick={() => setCancelDialogOpen(false)}>
+                          No, keep booking
+                        </Button>
+                        <Button
+                          className="bg-red-100 text-red-700 hover:bg-red-200 border border-red-200"
+                          onClick={() => {
+                            if (pendingCancelId !== null) {
+                              updateBookingStatus(pendingCancelId, "CANCELLED");
+                            }
+                            setCancelDialogOpen(false);
+                            setPendingCancelId(null);
+                          }}
+                        >
+                          Yes, cancel booking
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 </div>
               </CardContent>
             </Card>

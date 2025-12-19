@@ -224,7 +224,7 @@ export function BulletinManager() {
           </DialogHeader>
           <div className="flex justify-end space-x-2 mt-4">
             <Button variant="outline" onClick={cancelDelete}>Cancel</Button>
-            <Button variant="destructive" onClick={confirmDelete}>
+            <Button className="bg-red-100 text-red-700 hover:bg-red-200 border border-red-200" onClick={confirmDelete}>
               <Trash2 className="w-4 h-4 mr-2" />
               Delete
             </Button>
@@ -263,7 +263,7 @@ export function BulletinManager() {
                     <Button size="sm" variant="outline" onClick={() => handleEdit(post)}>
                       <Edit className="w-4 h-4" />
                     </Button>
-                    <Button size="sm" variant="destructive" onClick={() => handleDelete(post.id)}>
+                    <Button size="sm" className="bg-red-100 text-red-700 hover:bg-red-200 border border-red-200" onClick={() => handleDelete(post.id)}>
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>
