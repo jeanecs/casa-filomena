@@ -37,6 +37,7 @@ export function BookingForm({ villa: initialVilla, isOpen, onClose, onBookingSub
   const [step, setStep] = useState<'villa' | 'dates' | 'details' | 'confirmation'>(!initialVilla ? 'villa' : 'dates');
   const [showCalendar, setShowCalendar] = useState(false);
   const [totalPrice, setTotalPrice] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Initialize with preselected dates if provided
   useEffect(() => {
@@ -150,6 +151,8 @@ export function BookingForm({ villa: initialVilla, isOpen, onClose, onBookingSub
   };
 
   const handleBookingSubmit = async () => {
+    if (isSubmitting) return; // Prevent double submission
+
     if (!guestName || !guestEmail || !guestPhone) {
       toast.error("Please fill in all required fields");
       return;
@@ -173,6 +176,7 @@ export function BookingForm({ villa: initialVilla, isOpen, onClose, onBookingSub
       notes: notes || null
     };
 
+    setIsSubmitting(true);
     try {
       const response = await fetch('/api/VillaBooking', {
         method: 'POST',
@@ -191,9 +195,11 @@ export function BookingForm({ villa: initialVilla, isOpen, onClose, onBookingSub
         setStep('confirmation');
       } else {
         toast.error("Failed to submit booking");
+        setIsSubmitting(false);
       }
     } catch (error) {
       toast.error("Network error occurred");
+      setIsSubmitting(false);
     }
   };
 
@@ -205,6 +211,7 @@ export function BookingForm({ villa: initialVilla, isOpen, onClose, onBookingSub
     setGuestEmail('');
     setGuestPhone('');
     setNotes('');
+    setIsSubmitting(false);
     setStep(!initialVilla ? 'villa' : 'dates');
   };
 
@@ -414,12 +421,16 @@ export function BookingForm({ villa: initialVilla, isOpen, onClose, onBookingSub
             </div>
 
             <div className="flex justify-between">
-              <Button variant="outline" onClick={() => setStep('dates')} className="px-4 py-1 rounded-[2px]">
+              <Button variant="outline" onClick={() => setStep('dates')} className="px-4 py-1 rounded-[2px]" disabled={isSubmitting}>
                 Back
               </Button>
-              <Button onClick={handleBookingSubmit} className="bg-yellow-800 text-white text-md px-4 py-1 rounded-[2px] hover:bg-yellow-900 transition-colors font-medium shadow-md">
+              <Button
+                onClick={handleBookingSubmit}
+                disabled={isSubmitting}
+                className="bg-yellow-800 text-white text-md px-4 py-1 rounded-[2px] hover:bg-yellow-900 transition-colors font-medium shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+              >
                 <CreditCard className="w-4 h-4 mr-2" />
-                Submit Booking Request
+                {isSubmitting ? 'Submitting...' : 'Submit Booking Request'}
               </Button>
             </div>
           </div>

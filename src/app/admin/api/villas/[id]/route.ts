@@ -4,9 +4,10 @@ import {prisma} from "@/lib/prisma";
 export const dynamic = "force-dynamic";
 
 // GET single villa
-export async function GET(_: Request, { params }: { params: { id: string } }) {
+export async function GET(_: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const villa = await prisma.villa.findUnique({
-    where: { id: Number(params.id) },
+    where: { id: Number(id) },
   });
   if (!villa) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
@@ -17,12 +18,13 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
 }
 
 // PUT update villa
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const body = await req.json();
   const { name, description, image, bedrooms, bathrooms, guests, amenities } = body;
 
   const updated = await prisma.villa.update({
-    where: { id: Number(params.id) },
+    where: { id: Number(id) },
     data: {
       name,
       description,
@@ -41,7 +43,8 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
 }
 
 // DELETE villa
-export async function DELETE(_: Request, { params }: { params: { id: string } }) {
-  await prisma.villa.delete({ where: { id: Number(params.id) } });
+export async function DELETE(_: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  await prisma.villa.delete({ where: { id: Number(id) } });
   return NextResponse.json({ success: true });
 }

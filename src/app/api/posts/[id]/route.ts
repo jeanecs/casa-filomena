@@ -29,11 +29,12 @@ async function isAdmin(req: Request) {
 // GET /api/post/[id] → fetch single post
 export async function GET(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const post = await prisma.post.findUnique({
-      where: { id: Number(params.id) },
+      where: { id: Number(id) },
     });
 
     if (!post) {
@@ -53,17 +54,18 @@ export async function GET(
 // PUT /api/post/[id] → update a post
 export async function PUT(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   if (!(await isAdmin(req))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   }
-  
+
   try {
+    const { id } = await params;
     const data = await req.json();
 
     const updatedPost = await prisma.post.update({
-      where: { id: Number(params.id) },
+      where: { id: Number(id) },
       data: {
         title: data.title,
         content: data.content,
@@ -85,15 +87,16 @@ export async function PUT(
 // DELETE /api/post/[id] → delete a post
 export async function DELETE(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   if (!(await isAdmin(req))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   }
-  
+
   try {
+    const { id } = await params;
     await prisma.post.delete({
-      where: { id: Number(params.id) },
+      where: { id: Number(id) },
     });
 
     return NextResponse.json({ message: "Post deleted" });
