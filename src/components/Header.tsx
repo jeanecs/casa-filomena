@@ -7,7 +7,7 @@ export function Header() {
         <div className="flex justify-between items-center h-16">
           {/* Logo / Site name */}
           <div className="flex items-center space-x-8">
-            <a href="./">
+            <a href="../">
               <img
                 src="/Casa Filomena Logo-Black.svg"
                 alt="Casa Filomena Logo"
